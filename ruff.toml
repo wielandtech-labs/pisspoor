@@ -1,0 +1,11 @@
+line-length = 100
+target-version = "py313"
+# Django writes these; they are regenerated rather than edited by hand, so
+# holding them to the project style only creates churn.
+extend-exclude = ["*/migrations/*"]
+
+[lint]
+select = ["E", "F", "W", "I", "UP", "B", "DJ", "C4", "SIM"]
+
+[lint.per-file-ignores]
+"config/settings.py" = ["E501"]

@@ -1,0 +1,162 @@
+# Standard wielandtech-labs app build workflow.
+#
+# Copy this file into <app-repo>/.github/workflows/docker.yaml and edit ONLY
+# the env block below. Everything else encodes homelab conventions:
+#
+#   - Image tags MUST match the Flux ImagePolicy / review-app patterns:
+#       main push    -> YYYYMMDD-HHMMSS-<shortsha>   (deploys to prod via Flux)
+#       branch push  -> dev-YYYYMMDD-HHMMSS-<shortsha> (deploys to dev via Flux)
+#       pull request -> pr-<number>-<shortsha>         (review app)
+#     Do not "improve" these formats — Flux image automation and
+#     manage_review_app.py in wielandtech-labs/w_homelab parse them.
+#   - Builds run on the shared org runner pool (homelab-dind) against the
+#     in-cluster buildkitd over mTLS; there is no local Docker daemon.
+#   - Same-repo PRs push a pr- image and dispatch a review-app event to
+#     wielandtech-labs/w_homelab. Requires the HOMELAB_REVIEW_APP_TOKEN org secret
+#     (a PAT with permission to send repository_dispatch to w_homelab).
+#
+# Note: a branch push and a PR sync both build (dev- and pr- tags). The
+# registry buildcache makes the second build cheap; keep both so dev tracks
+# branches even without an open PR.
+
+name: Docker
+
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+
+env:
+  APP_NAME: pisspoor                        # must match .github/review-apps/<APP_NAME>.yaml in w_homelab
+  IMAGE: ghcr.io/wielandtech-labs/pisspoor # container image (repo name, underscores allowed)
+  HOMELAB_REPO: wielandtech-labs/w_homelab
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: docker-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build and push image
+    if: >-
+      github.event_name == 'push' ||
+      (github.event.action != 'closed' &&
+       github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: homelab-dind
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+      short_sha: ${{ steps.tag.outputs.short_sha }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Compute image tag
+        id: tag
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            sha="${{ github.event.pull_request.head.sha }}"
+            short_sha="${sha:0:7}"
+            tag="pr-${{ github.event.pull_request.number }}-${short_sha}"
+          else
+            short_sha="${GITHUB_SHA:0:7}"
+            stamp="$(date +%Y%m%d-%H%M%S)"
+            if [ "${GITHUB_REF_NAME}" = "main" ]; then
+              tag="${stamp}-${short_sha}"
+            else
+              tag="dev-${stamp}-${short_sha}"
+            fi
+          fi
+          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+          echo "short_sha=${short_sha}" >> "$GITHUB_OUTPUT"
+          echo "Building ${IMAGE}:${tag}"
+
+      - name: Set up Docker Buildx (remote buildkitd)
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver: remote
+          endpoint: tcp://buildkitd.buildkit.svc.cluster.local:1234
+          driver-opts: |
+            cacert=/etc/buildkit/certs/ca.crt
+            cert=/etc/buildkit/certs/tls.crt
+            key=/etc/buildkit/certs/tls.key
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ env.IMAGE }}:${{ steps.tag.outputs.tag }}
+          cache-from: type=registry,ref=${{ env.IMAGE }}:buildcache
+          cache-to: type=registry,ref=${{ env.IMAGE }}:buildcache,mode=max
+
+  review-app-upsert:
+    name: Deploy review app
+    needs: build
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.action != 'closed' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: homelab-dind
+    steps:
+      - name: Dispatch review-app upsert
+        env:
+          TOKEN: ${{ secrets.HOMELAB_REVIEW_APP_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          payload="$(jq -n \
+            --arg app "${APP_NAME}" \
+            --arg action "upsert" \
+            --arg pr_number "${{ github.event.pull_request.number }}" \
+            --arg image_tag "${{ needs.build.outputs.tag }}" \
+            --arg short_sha "${{ needs.build.outputs.short_sha }}" \
+            --arg source_repo "${{ github.repository }}" \
+            --arg source_pr_url "${{ github.event.pull_request.html_url }}" \
+            '{event_type: "review-app", client_payload: {app: $app, action: $action, pr_number: $pr_number, image_tag: $image_tag, short_sha: $short_sha, source_repo: $source_repo, source_pr_url: $source_pr_url}}')"
+          curl -sf -X POST \
+            -H "Authorization: Bearer ${TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${HOMELAB_REPO}/dispatches" \
+            -d "$payload"
+
+  review-app-delete:
+    name: Remove review app
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.action == 'closed' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: homelab-dind
+    steps:
+      - name: Dispatch review-app delete
+        env:
+          TOKEN: ${{ secrets.HOMELAB_REVIEW_APP_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          payload="$(jq -n \
+            --arg app "${APP_NAME}" \
+            --arg action "delete" \
+            --arg pr_number "${{ github.event.pull_request.number }}" \
+            --arg source_repo "${{ github.repository }}" \
+            --arg source_pr_url "${{ github.event.pull_request.html_url }}" \
+            '{event_type: "review-app", client_payload: {app: $app, action: $action, pr_number: $pr_number, source_repo: $source_repo, source_pr_url: $source_pr_url}}')"
+          curl -sf -X POST \
+            -H "Authorization: Bearer ${TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${HOMELAB_REPO}/dispatches" \
+            -d "$payload"
