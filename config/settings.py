@@ -39,6 +39,11 @@ PUBLIC_BASE_URL = os.environ.get("PUBLIC_BASE_URL", "https://pisspooridea.com").
 FUN_HOSTS = _env_list("FUN_HOSTS") or ["pisspooridea.lol", "www.pisspooridea.lol"]
 AGENCY_URL = os.environ.get("AGENCY_URL", "https://pisspooridea.com").rstrip("/")
 
+# Hosts allowed to serve the back office (/admin, /print/). Prod sets this to
+# the tailnet-only hostname; empty means unrestricted (dev, CI, review apps).
+# See core/middleware.py.
+ADMIN_HOSTS = [host.lower() for host in _env_list("ADMIN_HOSTS")]
+
 # Keys the daily visitor hash. Rotating it only resets dedup for the current
 # day; no raw IP is ever stored, so there is nothing else to re-key.
 SCAN_HASH_SECRET = os.environ.get("SCAN_HASH_SECRET", SECRET_KEY)
@@ -63,6 +68,10 @@ MIDDLEWARE = [
     # otherwise be rejected by the ALLOWED_HOSTS check. See core/views.py.
     "core.views.HealthCheckMiddleware",
     "scans.visitors.VisitorCookieMiddleware",
+    # Outside CommonMiddleware on purpose: its APPEND_SLASH would turn the 404
+    # for a bare "/admin" into a 301 to "/admin/", revealing the route exists.
+    # get_host() still enforces ALLOWED_HOSTS here.
+    "core.middleware.AdminHostMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",

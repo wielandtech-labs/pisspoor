@@ -21,5 +21,5 @@ Before pushing: `ruff check . && ruff format --check . && pytest`.
 ## Configuration
 
 All environment variables: `SECRET_KEY`, `DEBUG`, `ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS`,
-`DATABASE_*` (SQLite when `DATABASE_NAME` is unset), `PUBLIC_BASE_URL`, `FUN_HOSTS`, `AGENCY_URL`, `SCAN_HASH_SECRET`,
+`DATABASE_*` (SQLite when `DATABASE_NAME` is unset), `PUBLIC_BASE_URL`, `FUN_HOSTS`, `AGENCY_URL`, `ADMIN_HOSTS`, `SCAN_HASH_SECRET`,
 `TIME_ZONE`, `LOG_LEVEL`, `SECURE_SSL_REDIRECT`.
