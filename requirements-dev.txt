@@ -2,3 +2,5 @@
 pytest==8.4.2
 pytest-django==4.11.1
 ruff==0.13.0
+zxing-cpp==2.3.0
+pillow==11.3.0

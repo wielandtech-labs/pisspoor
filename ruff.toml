@@ -9,3 +9,5 @@ select = ["E", "F", "W", "I", "UP", "B", "DJ", "C4", "SIM"]
 
 [lint.per-file-ignores]
 "config/settings.py" = ["E501"]
+# Inline SVG drawing; splitting path data across lines only hurts reading it.
+"marketing/scenes.py" = ["E501"]

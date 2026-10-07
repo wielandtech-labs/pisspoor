@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Privacy · pisspooridea.lol{% endblock %}
+{% block body %}
+<main class="landing" style="max-width:720px">
+  <a class="logo" href="/">piss<span style="color:var(--red)">poor</span>idea.lol</a>
+  <h1 style="margin-top:20px">Privacy</h1>
+  <p>You scanned a QR code in a bathroom. Here's exactly what we do with that.</p>
+  <h3>What we record</h3>
+  <ul>
+    <li><strong>That a sticker was scanned</strong>, and when. This is how venues get paid.</li>
+    <li><strong>A one-way daily fingerprint.</strong> A keyed hash of your IP address, browser user-agent, the date and a random one-day cookie, so one person scanning twice in a day counts once. We never store the IP address or the cookie itself, and because the date is part of the hash, it can't link your visits across days.</li>
+    <li><strong>Anything you choose to submit:</strong> a star rating, a maintenance report, an optional comment. Comments are shown to the venue.</li>
+    <li><strong>Sponsor clicks</strong>, counted the same way.</li>
+  </ul>
+  <h3>What we don't do</h3>
+  <ul>
+    <li>No accounts, no names, no emails (unless you fill out our business contact form).</li>
+    <li>No advertising cookies, no third-party trackers, no analytics scripts on these pages. Our only cookies are a security token that protects the forms and the random one-day counting cookie above; it expires after 24 hours and means nothing outside this site.</li>
+    <li>No camera, location or contacts access. It's a web page.</li>
+    <li>We don't sell data. Advertisers see totals, not people.</li>
+  </ul>
+  <h3>Sponsor links</h3>
+  <p>When you tap a sponsor's button, you leave our site. Their privacy policy applies from there.</p>
+  <p class="fine">Questions? Use the contact form on the <a href="/">homepage</a>.</p>
+</main>
+{% endblock %}

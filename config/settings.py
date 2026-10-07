@@ -27,7 +27,7 @@ if DEBUG and not ALLOWED_HOSTS:
     ALLOWED_HOSTS = ["*"]
 CSRF_TRUSTED_ORIGINS = _env_list("CSRF_TRUSTED_ORIGINS")
 
-# Public base URL printed under every QR code and encoded into it. Short links
+# Public base URL encoded into every printed QR code. Short links
 # must outlive any one environment, so this is configured, never derived from
 # the request host.
 PUBLIC_BASE_URL = os.environ.get("PUBLIC_BASE_URL", "https://pisspooridea.lol").rstrip("/")
@@ -45,12 +45,17 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "core",
     "marketing",
+    "venues",
+    "scans",
+    "feedback",
+    "ads",
 ]
 
 MIDDLEWARE = [
     # Must stay first: health probes arrive with the pod IP as Host and would
     # otherwise be rejected by the ALLOWED_HOSTS check. See core/views.py.
     "core.views.HealthCheckMiddleware",
+    "scans.visitors.VisitorCookieMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",

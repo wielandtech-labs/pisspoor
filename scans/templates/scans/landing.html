@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}{{ venue.name }} restroom · pisspooridea.lol{% endblock %}
+{% block head %}<meta name="robots" content="noindex">{% endblock %}
+{% block body %}
+<main class="landing">
+  {% if thanks == "rated" %}<div class="notice" role="status">Thanks for rating! The staff will see it.</div>
+  {% elif thanks == "reported" %}<div class="notice" role="status">Reported. The staff have been notified.</div>
+  {% elif thanks == "dupe" %}<div class="notice warn" role="status">You already rated this one today. Thanks for caring this much.</div>
+  {% elif thanks == "slowdown" %}<div class="notice warn" role="status">That's a lot of reports. Please give the staff a minute.</div>
+  {% elif thanks == "invalid" %}<div class="notice warn" role="status">Something was missing. Mind trying again?</div>{% endif %}
+
+  <div class="venue">
+    <div class="kicker">You're at</div>
+    <h1>{{ venue.name }}</h1>
+    {% if avg_rating %}<div>Restroom rating: <strong>{{ avg_rating|floatformat:1 }} / 5</strong> <span class="fine">({{ rating_count }} in the last 30 days)</span></div>{% endif %}
+    {% with links=venue.social_links %}{% if links %}
+    <p class="fine" style="margin:12px 0 0">Like them? Show some love:</p>
+    <div class="socials">{% for label, url in links %}<a href="{{ url }}" target="_blank" rel="noopener">{{ label }}</a>{% endfor %}</div>
+    {% endif %}{% endwith %}
+  </div>
+
+  {% if campaign %}
+  <div class="card sponsor">
+    <div class="who">Sponsored · {{ campaign.advertiser }}</div>
+    <h2>{{ campaign.headline }}</h2>
+    {% if campaign.body %}<p>{{ campaign.body }}</p>{% endif %}
+    <a class="btn" href="{% url 'scans:ad_click' placement.code campaign.pk %}" rel="sponsored noopener" target="_blank">{{ campaign.cta_label }}</a>
+  </div>
+  {% endif %}
+
+  <div class="card">
+    <h2 style="font-size:1.4rem">How clean is it?</h2>
+    {% if already_rated %}
+      <p>You rated this restroom today. Come back tomorrow (not literally, unless you need to).</p>
+    {% else %}
+    <form method="post" action="{% url 'scans:rate' placement.code %}">
+      {% csrf_token %}
+      <fieldset style="border:0;padding:0;margin:0">
+        <legend class="fine" style="text-align:center;width:100%">1 = biohazard · 5 = spotless</legend>
+        <div class="stars">
+          {% for n in "54321" %}
+          <input type="radio" id="s{{ n }}" name="stars" value="{{ n }}" required>
+          <label for="s{{ n }}" title="{{ n }} out of 5">🧻<span class="hp">{{ n }} out of 5</span></label>
+          {% endfor %}
+        </div>
+      </fieldset>
+      <div class="field" style="margin-top:10px"><label for="comment">Anything to add? <span class="fine">(optional)</span></label>
+        <input type="text" id="comment" name="comment" maxlength="280" placeholder="e.g. the hand dryer is a jet engine"></div>
+      <div class="hp" aria-hidden="true"><input type="text" name="website" tabindex="-1" autocomplete="off"></div>
+      <button class="btn" type="submit">Rate it</button>
+    </form>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <h2 style="font-size:1.4rem">Something wrong?</h2>
+    <form method="post" action="{% url 'scans:report' placement.code %}">
+      {% csrf_token %}
+      <div class="issues" role="radiogroup" aria-label="What's wrong">
+        {% for value, label in issues %}
+        <label><input type="radio" name="issue" value="{{ value }}" required> {{ label }}</label>
+        {% endfor %}
+      </div>
+      <div class="field" style="margin-top:10px"><label for="note">Details <span class="fine">(optional)</span></label>
+        <input type="text" id="note" name="note" maxlength="280" placeholder="e.g. second stall, the lock is broken"></div>
+      <div class="hp" aria-hidden="true"><input type="text" name="website" tabindex="-1" autocomplete="off"></div>
+      <button class="btn" type="submit">Tell the staff</button>
+    </form>
+  </div>
+
+  <p class="fine" style="text-align:center;margin-top:22px">
+    Anonymous. No account, no tracking. <a href="{% url 'marketing:privacy' %}">Privacy</a> ·
+    <a href="{% url 'marketing:home' %}">Want this in your bathroom?</a>
+  </p>
+</main>
+{% endblock %}

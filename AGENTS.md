@@ -61,9 +61,57 @@ The restroom QR ad network behind **pisspooridea.lol**. Homelab slug `pisspoor`;
 image `ghcr.io/wielandtech-labs/pisspoor`; manifests in `w_homelab` under
 `clusters/{dev,prod}/apps/pisspoor/`.
 
+## Shape
+
+One Django service. Apps: `venues/` (Venue, Placement = one physical sticker,
+print artwork), `scans/` (short links, landing page, Scan, RevenuePeriod,
+payout math), `feedback/` (ratings, maintenance requests, venue board),
+`ads/` (sponsor campaigns, clicks), `marketing/` (homepage, leads, privacy).
+Back office is Django admin.
+
+## Rules that are not negotiable
+
+- **No contract, no stickers.** Print views and the admin print action refuse
+  any venue without `agreement_signed_on`. Do not add a bypass.
+- **A short code is permanent.** It is printed on a sticker on a wall. Codes are
+  generated once (`editable=False`) and never reused; deactivate a placement
+  instead of deleting or re-coding it. `PUBLIC_BASE_URL` is baked into every
+  printed QR the same way: prod points at `https://pisspooridea.lol` and must
+  not change.
+- **Short codes share the URL root** (`/<code>`). `scans.urls` is included
+  last, and any fixed route whose path could match the code pattern
+  (`[2-9a-z minus confusables]{6}`) must be added to `RESERVED_CODES`.
+- **Never store a raw IP.** Visitor identity is `scans.visitors.visitor_hash`
+  (HMAC of date + client IP + UA + a random one-day `ppv` cookie). It is per
+  day by design; don't widen it. The cookie is load-bearing: public HTTPS
+  arrives through the DO droplet's raw TCP passthrough with no PROXY
+  protocol, so **every public visitor has the same source IP** (the tunnel).
+  `client_ip` reads the *rightmost* X-Forwarded-For entry (the one our proxy
+  appended); never the leftmost, which the client controls. Until real client
+  IPs reach the cluster, a script that drops cookies counts as a new visitor
+  per request, so payout fraud resistance is weak; check the admin's scan
+  list for implausible spikes before paying out.
+- **Payouts reconcile exactly.** `scans.payouts.split_revenue` rounds venue
+  shares down and gives the remainder to the house; it is pure and
+  table-tested. A unique scan is a distinct (placement, visitor, day), bots
+  excluded. Any query that uses `.distinct()` on Scan must call `.order_by()`
+  first, because `Scan.Meta.ordering` would otherwise add `created_at` to the
+  DISTINCT and make every scan unique (a real bug caught by tests).
+- **Every sticker must decode.** The Bullseye punches a target out of the
+  middle of a level-H QR code; `venues/tests/test_qr_decodes.py` rasterises
+  each design and decodes it with ZXing. Measured limit on the prod URL:
+  hole width 0.38 decodes, 0.40 does not; `BULLSEYE_DIAMETER` is 0.32 for
+  headroom. Changing artwork, the hole size or `PUBLIC_BASE_URL` length means
+  re-running it, and a test print scanned on a real phone before a batch.
+- **The homepage product art is drawn by the print renderers**
+  (`venues.printing.preview_sticker`), so marketing never shows a sticker the
+  makerspace can't print.
+
 ## Configuration
 
-All config is environment variables; see README.md.
+All config is environment variables; see README.md. `ALLOW_DEMO_SEED=1` (set
+only by the review-app registry) lets `seed_demo` create demo data and print a
+one-time admin password to the pod log.
 
 ## Health endpoints
 

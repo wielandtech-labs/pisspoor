@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Print sheet · {{ stickers|length }} stickers</title>
+<style>
+  @page { size: letter; margin: 0.4in; }
+  body { font: 12px system-ui, sans-serif; margin: 0.4in; }
+  .bar { display: flex; gap: 12px; align-items: center; margin-bottom: 16px; }
+  .sheet { display: flex; flex-wrap: wrap; gap: 0.25in; }
+  figure { margin: 0; break-inside: avoid; }
+  figcaption { color: #555; margin-top: 4px; }
+  @media print { .bar, figcaption a { display: none; } }
+</style></head>
+<body>
+<div class="bar">
+  <button onclick="window.print()">Print</button>
+  <span>Print at 100% ("actual size"): stickers are drawn at physical size. Or download each SVG for the vinyl cutter.</span>
+</div>
+<div class="sheet">
+{% for placement, sticker in stickers %}
+  <figure>
+    {{ sticker.svg|safe }}
+    <figcaption>{{ placement.venue.name }} · {{ placement.label }} · {{ placement.code }}
+      · <a href="{% url 'venues:sticker_svg' placement.code %}?download=1">SVG</a></figcaption>
+  </figure>
+{% endfor %}
+</div>
+</body></html>
