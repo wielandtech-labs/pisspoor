@@ -6,14 +6,20 @@ from django.conf import settings
 from django.http import HttpRequest
 
 
+def _host(request: HttpRequest) -> str:
+    return request.get_host().split(":")[0].lower()
+
+
 def is_fun_site(request: HttpRequest) -> bool:
-    return request.get_host().split(":")[0].lower() in settings.FUN_HOSTS
+    return _host(request) in settings.FUN_HOSTS
 
 
 def brand(request: HttpRequest) -> dict[str, object]:
-    fun = is_fun_site(request)
+    # The printed brand follows the domain actually in the address bar, not
+    # the face being served: .lol can serve the agency site (prod does until
+    # pisspooridea.com is registered). Dev and review hosts read as .com.
     return {
-        "is_fun_site": fun,
-        "brand_tld": "lol" if fun else "com",
+        "is_fun_site": is_fun_site(request),
+        "brand_tld": "lol" if _host(request).endswith(".lol") else "com",
         "agency_url": settings.AGENCY_URL,
     }
