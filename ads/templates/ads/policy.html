@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Advertising policy · Piss Poor Idea{% endblock %}
+{% block body %}
+<main class="landing" style="max-width:760px">
+  <a class="logo" href="/">piss<span style="color:var(--red)">poor</span>idea</a>
+  <h1 style="margin-top:20px">Advertising policy</h1>
+  <p>Our ads run in bathrooms: a captive audience, sometimes including kids, next to a venue's name. So every ad is reviewed by a person before it runs, and the rules are strict.</p>
+
+  <h3>What we accept</h3>
+  <ul>{% for label in categories %}<li>{{ label }}</li>{% endfor %}</ul>
+
+  <h3>What we don't</h3>
+  <ul>
+    <li>Illegal drugs, drug paraphernalia, and anything promoting drug use</li>
+    <li>Sexual services, escorts, solicitation, or adult content</li>
+    <li>Weapons, ammunition, and accessories</li>
+    <li>Alcohol, cannabis, tobacco and vaping, and gambling or sports betting <span class="fine">(not accepted at launch)</span></li>
+    <li>Hate, harassment, or content targeting people for who they are</li>
+    <li>Scams, get-rich-quick schemes, crypto investment pitches, and predatory lending</li>
+    <li>Medical, health or financial claims you can't back up</li>
+    <li>Anything deceptive, including ads dressed up as something they're not</li>
+  </ul>
+
+  <h3>How review works</h3>
+  <ul>
+    <li>Every campaign starts as <strong>pending</strong> and runs only after approval.</li>
+    <li>Approval covers the exact link we reviewed. Change the destination and the ad stops until it's reviewed again.</li>
+    <li>We can reject or pull any ad, and every ad is labeled <strong>Sponsored</strong>.</li>
+  </ul>
+
+  <h3>Political ads</h3>
+  <ul>
+    <li>Political ads must include a "paid for by" disclaimer, which we show word for word. You're responsible for its wording meeting the rules for your race.</li>
+    <li>Political ads are labeled <strong>Political ad</strong>, and ads made in whole or substantially with AI carry that disclosure.</li>
+    <li>They run only at venues that have opted in to political ads.</li>
+    <li>Every approved political ad is listed in our public <a href="{% url 'ads:political_archive' %}">political ad archive</a>: who paid, when it ran, and how many times it was shown.</li>
+  </ul>
+
+  <p class="fine">Questions about a campaign? Use the contact form on the <a href="/">homepage</a>.</p>
+</main>
+{% endblock %}

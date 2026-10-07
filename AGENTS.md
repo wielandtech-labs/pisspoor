@@ -108,6 +108,20 @@ Back office is Django admin.
   hole width 0.38 decodes, 0.40 does not; `BULLSEYE_DIAMETER` is 0.32 for
   headroom. Changing artwork, the hole size or `PUBLIC_BASE_URL` length means
   re-running it, and a test print scanned on a real phone before a batch.
+- **No ad runs without human approval, and approval is pinned to the link.**
+  `Campaign.objects.live()` only returns `status=approved`; status changes
+  only via `approve()`/`reject()` (admin actions), and saving an approved
+  campaign with a different `target_url` drops it back to pending. Banned and
+  launch-restricted categories (drugs, sexual services, weapons, alcohol,
+  cannabis, tobacco, gambling) are intentionally absent from
+  `Campaign.Category`; adding one is a policy decision, not a code tweak.
+  The public rules are `ads/templates/ads/policy.html`; keep them in sync.
+- **Political ads:** `approve()` refuses without `paid_for_by` (shown
+  verbatim) and `sponsor_contact`; they carry a "Political ad" label, the AI
+  disclosure when `ai_generated`, and appear in the public `/political-ads`
+  archive with impressions (`Scan.campaign`). They only run at venues with
+  `allow_political_ads` (default off). The app checks a disclaimer exists;
+  whether its wording satisfies the race's rules is the reviewer's call.
 - **The homepage product art is drawn by the print renderers**
   (`venues.printing.preview_sticker`), so marketing never shows a sticker the
   makerspace can't print.

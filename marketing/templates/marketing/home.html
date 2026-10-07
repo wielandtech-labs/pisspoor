@@ -132,7 +132,7 @@
       <div>
         <div class="kicker">Get stuck</div>
         <h2>Got a bathroom? Got something to sell?</h2>
-        <p>Venues: tell us about your spot and we'll come by with a sample. Advertisers: ask about launch pricing for the first network-wide campaign.</p>
+        <p>Venues: tell us about your spot and we'll come by with a sample. Advertisers: ask about launch pricing for the first network-wide campaign, and read our <a href="{% url 'ads:policy' %}">ad policy</a> first.</p>
         <p class="fine">Every placement starts with a one-page agreement with the venue, and you can have the stickers taken down anytime.</p>
       </div>
       <div>
@@ -156,7 +156,7 @@
 <footer>
   <div class="wrap">
     <span>© pisspooridea.{{ brand_tld }}: a pretty good idea, actually.</span>
-    <a href="{% url 'marketing:privacy' %}">Privacy</a>
+    <span><a href="{% url 'ads:policy' %}">Ad policy</a> · <a href="{% url 'ads:political_archive' %}">Political ad archive</a> · <a href="{% url 'marketing:privacy' %}">Privacy</a></span>
   </div>
 </footer>
 {% endblock %}

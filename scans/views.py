@@ -43,9 +43,13 @@ def landing(request: HttpRequest, code: str) -> HttpResponse:
     visitor = visitor_hash(request)
     # Only a fresh arrival counts; the redirect back after rating/reporting
     # carries ?thanks= and must not look like another scan.
+    campaign = pick_campaign(placement.venue)
     if "thanks" not in request.GET:
         Scan.objects.create(
-            placement=placement, visitor_hash=visitor, is_bot=is_bot(user_agent(request))
+            placement=placement,
+            visitor_hash=visitor,
+            is_bot=is_bot(user_agent(request)),
+            campaign=campaign,
         )
     since = timezone.now() - timedelta(days=30)
     venue_ratings = Rating.objects.filter(placement__venue=placement.venue, created_at__gte=since)
@@ -56,7 +60,7 @@ def landing(request: HttpRequest, code: str) -> HttpResponse:
         {
             "placement": placement,
             "venue": placement.venue,
-            "campaign": pick_campaign(),
+            "campaign": campaign,
             "issues": MaintenanceRequest.Issue.choices,
             "avg_rating": summary["avg"],
             "rating_count": venue_ratings.count(),
@@ -115,6 +119,10 @@ def report(request: HttpRequest, code: str) -> HttpResponse:
 def ad_click(request: HttpRequest, code: str, campaign_id: int) -> HttpResponse:
     placement = _live_placement(code)
     campaign = Campaign.objects.live().filter(pk=campaign_id).first()
+    # Same rule as pick_campaign: a venue that never opted in to political
+    # ads must not have political clicks attributed to it.
+    if campaign is not None and campaign.is_political and not placement.venue.allow_political_ads:
+        campaign = None
     if campaign is None:
         raise Http404("No such campaign")
     if not is_bot(user_agent(request)):

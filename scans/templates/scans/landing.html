@@ -21,10 +21,13 @@
 
   {% if campaign %}
   <div class="card sponsor">
-    <div class="who">Sponsored · {{ campaign.advertiser }}</div>
+    <div class="who">{% if campaign.is_political %}Political ad{% else %}Sponsored{% endif %} · {{ campaign.advertiser }}</div>
     <h2>{{ campaign.headline }}</h2>
     {% if campaign.body %}<p>{{ campaign.body }}</p>{% endif %}
     <a class="btn" href="{% url 'scans:ad_click' placement.code campaign.pk %}" rel="sponsored noopener" target="_blank">{{ campaign.cta_label }}</a>
+    {% if campaign.is_political %}
+    <p class="disclaimer">{{ campaign.paid_for_by }}{% if campaign.ai_generated %}<br>This message was generated in whole or substantially by artificial intelligence.{% endif %}<br><a href="{% url 'ads:political_archive' %}">Political ad archive</a></p>
+    {% endif %}
   </div>
   {% endif %}
 
