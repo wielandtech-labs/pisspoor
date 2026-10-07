@@ -74,3 +74,14 @@ def test_stickers_default_to_the_com_domain():
     from django.conf import settings
 
     assert settings.PUBLIC_BASE_URL == "https://pisspooridea.com"
+
+
+def test_lol_host_serving_agency_face_still_says_lol(client, settings):
+    # Prod until pisspooridea.com exists: FUN_HOSTS points elsewhere, so .lol
+    # serves the agency site, and must not brand itself as .com.
+    settings.ALLOWED_HOSTS = ["pisspooridea.lol"]
+    settings.FUN_HOSTS = ["agency-domain-pending.invalid"]
+    body = client.get("/", HTTP_HOST="pisspooridea.lol").content.decode()
+    assert "The Big Splash" in body
+    assert "pisspooridea.com" not in body
+    assert "idea<span>.</span>lol" in body
