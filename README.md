@@ -1,6 +1,7 @@
 # pisspoor
 
-The app behind [pisspooridea.lol](https://pisspooridea.lol): a restroom QR ad network.
+The app behind [pisspooridea.com](https://pisspooridea.com) (agency) and
+[pisspooridea.lol](https://pisspooridea.lol) (guerrilla site): a restroom QR ad network.
 Venues sign up, we stick QR codes in their bathrooms, patrons scan, and ad revenue is
 split across venues by traffic.
 
@@ -20,5 +21,5 @@ Before pushing: `ruff check . && ruff format --check . && pytest`.
 ## Configuration
 
 All environment variables: `SECRET_KEY`, `DEBUG`, `ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS`,
-`DATABASE_*` (SQLite when `DATABASE_NAME` is unset), `PUBLIC_BASE_URL`, `SCAN_HASH_SECRET`,
+`DATABASE_*` (SQLite when `DATABASE_NAME` is unset), `PUBLIC_BASE_URL`, `FUN_HOSTS`, `AGENCY_URL`, `SCAN_HASH_SECRET`,
 `TIME_ZONE`, `LOG_LEVEL`, `SECURE_SSL_REDIRECT`.
