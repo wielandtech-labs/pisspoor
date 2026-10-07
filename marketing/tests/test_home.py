@@ -43,3 +43,34 @@ def test_seed_demo_is_gated_and_idempotent(monkeypatch):
     call_command("seed_demo")
     call_command("seed_demo")
     assert Venue.objects.filter(slug="the-rusty-tap").count() == 1
+
+
+@pytest.fixture
+def both_hosts(settings):
+    settings.ALLOWED_HOSTS = ["pisspooridea.com", "pisspooridea.lol", "www.pisspooridea.lol"]
+    settings.FUN_HOSTS = ["pisspooridea.lol", "www.pisspooridea.lol"]
+    settings.AGENCY_URL = "https://pisspooridea.com"
+
+
+def test_lol_host_gets_the_fun_front_door(client, both_hosts):
+    body = client.get("/", HTTP_HOST="www.pisspooridea.lol").content.decode()
+    assert "You found a piss poor idea." in body
+    assert 'href="https://pisspooridea.com/#contact"' in body
+    assert "The Big Splash" not in body
+
+
+def test_com_host_gets_the_agency_site(client, both_hosts):
+    body = client.get("/", HTTP_HOST="pisspooridea.com").content.decode()
+    assert "The Big Splash" in body
+    assert "idea<span>.</span>com" in body
+
+
+def test_short_codes_resolve_on_both_hosts(client, both_hosts, placement):
+    for host in ("pisspooridea.com", "pisspooridea.lol"):
+        assert client.get(f"/{placement.code}", HTTP_HOST=host).status_code == 200
+
+
+def test_stickers_default_to_the_com_domain():
+    from django.conf import settings
+
+    assert settings.PUBLIC_BASE_URL == "https://pisspooridea.com"

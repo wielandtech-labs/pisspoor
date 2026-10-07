@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}You found a piss poor idea{% endblock %}
+{% block description %}QR codes in bathroom stalls. The venue gets paid; you get a say in how clean it is.{% endblock %}
+{% block body %}
+<header class="top">
+  <div class="wrap">
+    <a class="logo" href="/">piss<span>poor</span>idea<span>.</span>lol</a>
+    <nav aria-label="Main"><a href="{{ agency_url }}/">For venues &amp; advertisers →</a></nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <div>
+        <div class="kicker">You scanned it. Of course you did.</div>
+        <h1>You found a piss poor idea.</h1>
+        <p class="lede">QR codes in bathroom stalls. The venue gets paid, you get a say in how clean it is, and the wall finally earns its keep.</p>
+        <div class="cta-row">
+          <a class="btn" href="{{ agency_url }}/#contact">Put one in your bathroom</a>
+          <a class="btn ghost" href="{{ agency_url }}/#how">How it works</a>
+        </div>
+      </div>
+      <div class="frame">{{ urinal_scene }}</div>
+    </div>
+  </section>
+
+  <section class="alt">
+    <div class="wrap">
+      <div class="perks">
+        <div class="perk"><div class="icon" aria-hidden="true">⭐</div><h3>Rate it</h3><p>One tap, 1 to 5.</p></div>
+        <div class="perk"><div class="icon" aria-hidden="true">🧻</div><h3>Restock it</h3><p>Out of TP? Staff hear about it.</p></div>
+        <div class="perk"><div class="icon" aria-hidden="true">🔧</div><h3>Fix it</h3><p>Broken lock, clogged sink, flood.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap split">
+      <div class="frame">{{ stall_scene }}</div>
+      <div>
+        <h2>Spotted one in the wild?</h2>
+        <p>That venue gets a cut of every ad dollar its stickers earn. Scan it, rate it, and tell your favorite bar it's missing out.</p>
+        <a class="btn" href="{{ agency_url }}/">See the grown-up version</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>© pisspooridea.lol</span>
+    <a href="{% url 'marketing:privacy' %}">Privacy</a>
+  </div>
+</footer>
+{% endblock %}

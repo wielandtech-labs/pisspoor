@@ -57,7 +57,10 @@ Rollback = revert the environment's HelmRelease image tag in w_homelab via PR.
 
 # This app: `pisspoor`
 
-The restroom QR ad network behind **pisspooridea.lol**. Homelab slug `pisspoor`;
+The restroom QR ad network behind **pisspooridea.com** (the agency: venues and
+advertisers) and **pisspooridea.lol** (the playful guerrilla front door). One
+app, two faces chosen by Host (`marketing.sites.is_fun_site`, `FUN_HOSTS`);
+short codes resolve on both. Homelab slug `pisspoor`;
 image `ghcr.io/wielandtech-labs/pisspoor`; manifests in `w_homelab` under
 `clusters/{dev,prod}/apps/pisspoor/`.
 
@@ -76,8 +79,10 @@ Back office is Django admin.
 - **A short code is permanent.** It is printed on a sticker on a wall. Codes are
   generated once (`editable=False`) and never reused; deactivate a placement
   instead of deleting or re-coding it. `PUBLIC_BASE_URL` is baked into every
-  printed QR the same way: prod points at `https://pisspooridea.lol` and must
-  not change.
+  printed QR the same way: prod points at `https://pisspooridea.com` and must
+  not change once stickers are out. (It moved from `.lol` to `.com` on
+  2026-10-07, before any venue sticker was printed. `.lol` must keep resolving
+  short codes regardless.)
 - **Short codes share the URL root** (`/<code>`). `scans.urls` is included
   last, and any fixed route whose path could match the code pattern
   (`[2-9a-z minus confusables]{6}`) must be added to `RESERVED_CODES`.

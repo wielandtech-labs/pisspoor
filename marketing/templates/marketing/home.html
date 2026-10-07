@@ -2,7 +2,7 @@
 {% block body %}
 <header class="top">
   <div class="wrap">
-    <a class="logo" href="/">piss<span>poor</span>idea<span>.</span>lol</a>
+    <a class="logo" href="/">piss<span>poor</span>idea<span>.</span>{{ brand_tld }}</a>
     <nav aria-label="Main">
       <a href="#how">How it works</a>
       <a href="#products">Stickers</a>
@@ -155,7 +155,7 @@
 
 <footer>
   <div class="wrap">
-    <span>© pisspooridea.lol: a pretty good idea, actually.</span>
+    <span>© pisspooridea.{{ brand_tld }}: a pretty good idea, actually.</span>
     <a href="{% url 'marketing:privacy' %}">Privacy</a>
   </div>
 </footer>
