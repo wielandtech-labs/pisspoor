@@ -1,0 +1,15 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Piss Poor Idea: bathroom advertising that actually gets seen{% endblock %}</title>
+  <meta name="description" content="{% block description %}QR code advertising in bar and restaurant restrooms. Venues earn a share of the ad revenue; patrons rate the bathroom and report problems.{% endblock %}">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%23e4572e'/><circle cx='50' cy='50' r='30' fill='%23fff'/><circle cx='50' cy='50' r='14' fill='%23e4572e'/></svg>">
+  <link rel="stylesheet" href="{% static 'marketing/site.css' %}">
+  {% block head %}{% endblock %}
+</head>
+<body>
+{% block body %}{% endblock %}
+</body>
+</html>

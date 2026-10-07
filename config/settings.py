@@ -45,12 +45,17 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "core",
     "marketing",
+    "venues",
+    "scans",
+    "feedback",
+    "ads",
 ]
 
 MIDDLEWARE = [
     # Must stay first: health probes arrive with the pod IP as Host and would
     # otherwise be rejected by the ALLOWED_HOSTS check. See core/views.py.
     "core.views.HealthCheckMiddleware",
+    "scans.visitors.VisitorCookieMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",

@@ -20,3 +20,27 @@ def _plain_static_storage(settings):
         **settings.STORAGES,
         "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
     }
+
+
+@pytest.fixture
+def venue(db):
+    from datetime import date
+
+    from venues.models import Venue
+
+    return Venue.objects.create(
+        name="The Rusty Tap",
+        slug="rusty",
+        instagram_url="https://instagram.com/rusty",
+        agreement_signed_on=date(2026, 1, 1),
+    )
+
+
+@pytest.fixture
+def placement(venue):
+    from venues.models import Placement
+
+    return Placement.objects.create(venue=venue, label="Stall 1")
+
+
+PHONE = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) Safari/604.1"

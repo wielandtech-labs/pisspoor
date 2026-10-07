@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}{{ venue.name }}: maintenance board{% endblock %}
+{% block head %}<meta name="robots" content="noindex"><meta name="referrer" content="no-referrer"><meta http-equiv="refresh" content="120">{% endblock %}
+{% block body %}
+<main class="board">
+  <div class="kicker">Maintenance board · private link, keep it to your staff</div>
+  <h1 style="margin:8px 0 18px">{{ venue.name }}</h1>
+
+  <div class="stats">
+    <div class="stat"><b>{{ open_requests|length }}</b>open requests</div>
+    <div class="stat"><b>{% if avg_rating %}{{ avg_rating|floatformat:1 }}{% else %}–{% endif %}</b>avg rating, 30 days ({{ rating_count }})</div>
+    <div class="stat"><b>{{ unique_scans }}</b>unique scans, 30 days</div>
+  </div>
+
+  <div class="card">
+    <h2 style="font-size:1.4rem">Needs attention</h2>
+    {% for item in open_requests %}
+    <div class="ticket">
+      <div>
+        <span class="pill {{ item.status }}">{{ item.get_status_display }}</span>
+        <strong>{{ item.get_issue_display }}</strong> · {{ item.placement.label }}
+        <div class="fine">{{ item.created_at|timesince }} ago{% if item.note %}: “{{ item.note }}”{% endif %}</div>
+      </div>
+      <form method="post" action="{% url 'feedback:update_request' venue.board_token item.pk %}">
+        {% csrf_token %}
+        {% if item.status == "open" %}<button class="btn ghost" name="action" value="ack">On it</button>{% endif %}
+        <button class="btn" name="action" value="resolve">Done</button>
+      </form>
+    </div>
+    {% empty %}
+    <p>All clear. Nothing to do. 🧽</p>
+    {% endfor %}
+  </div>
+
+  {% if recent_comments %}
+  <div class="card">
+    <h2 style="font-size:1.4rem">What guests are saying</h2>
+    {% for r in recent_comments %}
+    <div class="ticket"><div><strong>{{ r.stars }}/5</strong> · {{ r.placement.label }}<div class="fine">“{{ r.comment }}” · {{ r.created_at|timesince }} ago</div></div></div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if resolved_requests %}
+  <div class="card">
+    <h2 style="font-size:1.4rem">Recently fixed</h2>
+    {% for item in resolved_requests %}
+    <div class="ticket">
+      <div><span class="pill resolved">Resolved</span> {{ item.get_issue_display }} · {{ item.placement.label }}
+        <div class="fine">fixed {{ item.resolved_at|timesince }} ago</div></div>
+      <form method="post" action="{% url 'feedback:update_request' venue.board_token item.pk %}">{% csrf_token %}<button class="btn ghost" name="action" value="reopen">Reopen</button></form>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <p class="fine">Your stickers: {% for p in placements %}{{ p.label }} ({{ p.code }}){% if not forloop.last %}, {% endif %}{% endfor %}. This page refreshes every 2 minutes.</p>
+</main>
+{% endblock %}

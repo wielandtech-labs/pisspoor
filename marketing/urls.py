@@ -6,4 +6,5 @@ app_name = "marketing"
 
 urlpatterns = [
     path("", views.home, name="home"),
+    path("privacy", views.privacy, name="privacy"),
 ]
