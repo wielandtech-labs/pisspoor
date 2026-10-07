@@ -55,6 +55,10 @@ class Venue(models.Model):
         help_text="Date the placement agreement was signed. No agreement, no stickers: "
         "print sheets are refused until this is set.",
     )
+    allow_political_ads = models.BooleanField(
+        default=False,
+        help_text="Off by default: the venue's name sits next to every ad, so it opts in.",
+    )
     active = models.BooleanField(default=True)
     # Secret link to the venue's maintenance board. Regenerate it (blank the
     # field in the shell) if the venue leaks it.

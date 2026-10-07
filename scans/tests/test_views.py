@@ -107,6 +107,7 @@ def test_landing_shows_live_sponsor_and_click_redirects(client, placement):
     campaign = Campaign.objects.create(
         advertiser="Joe", headline="Fix it", target_url="https://example.com/joe"
     )
+    campaign.approve()
     assert b"Fix it" in get(client, f"/{placement.code}").content
     response = get(client, f"/{placement.code}/ad/{campaign.pk}")
     assert response.status_code == 302
@@ -121,6 +122,7 @@ def test_expired_campaign_is_neither_shown_nor_clickable(client, placement):
         target_url="https://example.com/old",
         ends_on=timezone.localdate() - timedelta(days=1),
     )
+    campaign.approve()
     assert b"Gone" not in get(client, f"/{placement.code}").content
     assert get(client, f"/{placement.code}/ad/{campaign.pk}").status_code == 404
 

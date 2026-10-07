@@ -45,6 +45,7 @@ class Command(BaseCommand):
             instagram_url="https://instagram.com/",
             google_reviews_url="https://maps.google.com/",
             agreement_signed_on=today - timedelta(days=20),
+            allow_political_ads=True,
         )
         tacos = Venue.objects.create(
             name="Taco Libre",
@@ -60,19 +61,41 @@ class Command(BaseCommand):
             Placement.objects.create(venue=rusty, label="Women's mirror", product="branded"),
             Placement.objects.create(venue=tacos, label="Unisex stall", product="large"),
         ]
-        Campaign.objects.create(
+        joe = Campaign.objects.create(
             advertiser="Joe's Plumbing",
+            category=Campaign.Category.SERVICES,
             headline="We fix what you just broke.",
             body="24/7 emergency service. Mention this sticker for $20 off.",
             cta_label="Call Joe",
             target_url="https://example.com/joes-plumbing",
             weight=2,
         )
-        Campaign.objects.create(
+        rides = Campaign.objects.create(
             advertiser="Night Owl Rides",
+            category=Campaign.Category.SERVICES,
             headline="Had a few? Get home safe.",
             cta_label="Book a ride",
             target_url="https://example.com/night-owl",
+        )
+        # Fictional candidate: shows the political label, disclaimer and archive.
+        council = Campaign.objects.create(
+            advertiser="Pat Example for City Council",
+            category=Campaign.Category.POLITICAL,
+            headline="Fix the potholes. Then the bathrooms.",
+            cta_label="Meet Pat",
+            target_url="https://example.com/pat-for-council",
+            paid_for_by="Paid for by Pat Example for City Council, 100 Example Ave, Anytown MI",
+            sponsor_contact="100 Example Ave, Anytown MI",
+            ai_generated=True,
+        )
+        for campaign in (joe, rides, council):
+            campaign.approve()
+        # Left pending so the review queue isn't empty.
+        Campaign.objects.create(
+            advertiser="Brand New Gym",
+            category=Campaign.Category.WELLNESS,
+            headline="First month free.",
+            target_url="https://example.com/gym",
         )
 
         now = timezone.now()

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Political ad archive · Piss Poor Idea{% endblock %}
+{% block body %}
+<main class="landing" style="max-width:760px">
+  <a class="logo" href="/">piss<span style="color:var(--red)">poor</span>idea</a>
+  <h1 style="margin-top:20px">Political ad archive</h1>
+  <p>Every political ad we've approved, who paid for it, and how many times it was shown. See our <a href="{% url 'ads:policy' %}">advertising policy</a> for the rules.</p>
+
+  {% for ad in ads %}
+  <div class="card">
+    <div class="kicker">{{ ad.advertiser }}</div>
+    <h2 style="font-size:1.3rem;margin:6px 0">{{ ad.headline }}</h2>
+    {% if ad.body %}<p style="margin:0 0 8px">{{ ad.body }}</p>{% endif %}
+    <p class="fine" style="margin:0">
+      {{ ad.paid_for_by }} · {{ ad.sponsor_contact }}<br>
+      Ran {{ ad.starts_on|date:"M j, Y" }}{% if ad.ends_on %} – {{ ad.ends_on|date:"M j, Y" }}{% else %} – ongoing{% endif %}
+      · {{ ad.impression_total }} impression{{ ad.impression_total|pluralize }} · {{ ad.click_total }} click{{ ad.click_total|pluralize }}
+      {% if ad.ai_generated %}<br>Made in whole or substantially with artificial intelligence.{% endif %}
+      {% if ad.status != "approved" %}<br>No longer running ({{ ad.get_status_display|lower }}).{% endif %}
+    </p>
+  </div>
+  {% empty %}
+  <p>No political ads have run yet.</p>
+  {% endfor %}
+</main>
+{% endblock %}

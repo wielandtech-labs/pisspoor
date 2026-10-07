@@ -22,6 +22,11 @@ class Scan(models.Model):
     created_at = models.DateTimeField(default=timezone.now, db_index=True)
     visitor_hash = models.CharField(max_length=64, db_index=True)
     is_bot = models.BooleanField(default=False)
+    # The ad this scan's landing page showed: impressions for advertiser
+    # reports and the political ad archive.
+    campaign = models.ForeignKey(
+        "ads.Campaign", null=True, blank=True, on_delete=models.SET_NULL, related_name="impressions"
+    )
 
     class Meta:
         ordering = ["-created_at"]

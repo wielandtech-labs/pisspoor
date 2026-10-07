@@ -10,6 +10,7 @@ urlpatterns = [
     path("", include("marketing.urls")),
     path("", include("venues.urls")),
     path("", include("feedback.urls")),
+    path("", include("ads.urls")),
     # Last: short codes live at the URL root and must never shadow a real page.
     path("", include("scans.urls")),
 ]

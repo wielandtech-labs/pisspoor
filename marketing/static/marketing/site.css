@@ -183,3 +183,9 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
   .steps, .stats { grid-template-columns: 1fr; }
   .issues { grid-template-columns: 1fr; }
 }
+.sponsor .disclaimer { margin: 16px 0 0; font-size: .85rem; line-height: 1.4; color: #e8e2d6; }
+.sponsor .disclaimer a { color: var(--yellow); }
+@media (max-width: 360px) {
+  .stars label { font-size: 1.8rem; }
+  .card { padding: 14px; }
+}
