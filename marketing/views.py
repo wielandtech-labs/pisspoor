@@ -4,6 +4,7 @@ from django.shortcuts import redirect, render
 
 from .models import Lead
 from .scenes import homepage_scenes
+from .sites import is_fun_site
 
 
 class LeadForm(forms.ModelForm):
@@ -19,6 +20,8 @@ class LeadForm(forms.ModelForm):
 
 
 def home(request):
+    if is_fun_site(request):
+        return render(request, "marketing/fun.html", homepage_scenes(settings.PUBLIC_BASE_URL))
     form = LeadForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         if not form.cleaned_data["website"]:

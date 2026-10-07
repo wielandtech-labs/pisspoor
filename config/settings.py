@@ -1,4 +1,4 @@
-"""Settings for pisspooridea.lol.
+"""Settings for pisspooridea.com / pisspooridea.lol.
 
 Every value comes from the environment — the homelab HelmReleases inject them,
 and there is no settings module per environment. See README.md for the full
@@ -30,7 +30,14 @@ CSRF_TRUSTED_ORIGINS = _env_list("CSRF_TRUSTED_ORIGINS")
 # Public base URL encoded into every printed QR code. Short links
 # must outlive any one environment, so this is configured, never derived from
 # the request host.
-PUBLIC_BASE_URL = os.environ.get("PUBLIC_BASE_URL", "https://pisspooridea.lol").rstrip("/")
+PUBLIC_BASE_URL = os.environ.get("PUBLIC_BASE_URL", "https://pisspooridea.com").rstrip("/")
+
+# Two front doors, one app: the agency site (.com, where venues and
+# advertisers sign up) and the playful guerrilla site (.lol). Short codes
+# resolve on both. Hosts listed here get the .lol face; everything else
+# (including dev and review apps) gets the agency face.
+FUN_HOSTS = _env_list("FUN_HOSTS") or ["pisspooridea.lol", "www.pisspooridea.lol"]
+AGENCY_URL = os.environ.get("AGENCY_URL", "https://pisspooridea.com").rstrip("/")
 
 # Keys the daily visitor hash. Rotating it only resets dedup for the current
 # day; no raw IP is ever stored, so there is nothing else to re-key.
@@ -79,6 +86,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "marketing.sites.brand",
             ],
         },
     },
