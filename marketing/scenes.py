@@ -42,22 +42,33 @@ def _svg(body: str, label: str) -> SafeString:
 
 
 def stall_scene(base_url: str) -> SafeString:
+    """The view from the seat: the closed stall door, knees, phone in hand."""
     sticker = preview_sticker(Placement.Product.LARGE, base_url)
+    denim, skin = "#3d5a80", "#d8a47f"
     return _svg(
-        _tiles(400, 300)
-        # stall door, slightly ajar, with hinge and latch
-        + '<rect x="70" y="0" width="260" height="270" fill="#5b8e7d"/>'
-        + '<rect x="70" y="0" width="260" height="270" fill="none" stroke="#3f6b5c" stroke-width="6"/>'
-        + '<rect x="78" y="40" width="8" height="26" rx="3" fill="#2d4b41"/>'
-        + '<rect x="78" y="200" width="8" height="26" rx="3" fill="#2d4b41"/>'
-        + '<rect x="306" y="130" width="16" height="30" rx="4" fill="#d9d9d9"/>'
-        + '<rect x="0" y="270" width="400" height="30" fill="#cfc6b8"/>'
-        + f'<rect x="150" y="34" width="108" height="134" rx="8" fill="{SHADOW}"/>'
-        + inline(sticker, 144, 26, 112)
-        + '<text x="200" y="210" text-anchor="middle" font-size="13" '
-        'font-family="Georgia, serif" font-style="italic" fill="#e8f0ec">'
-        "eye level. captive audience.</text>",
-        "A large QR sticker on the inside of a bathroom stall door",
+        # side partitions and floor visible under the door
+        '<rect width="400" height="300" fill="#4a7a6a"/>'
+        + '<rect x="0" y="236" width="400" height="64" fill="#cfc6b8"/>'
+        # the door, closed, with a coat hook and the latch
+        + '<rect x="46" y="0" width="308" height="236" fill="#5b8e7d" stroke="#3f6b5c" stroke-width="6"/>'
+        + '<path d="M200 10v12a8 8 0 0 0 16 0" fill="none" stroke="#d9d9d9" stroke-width="5" stroke-linecap="round"/>'
+        + '<rect x="330" y="104" width="14" height="34" rx="4" fill="#d9d9d9"/>'
+        # toilet roll on the left partition
+        + f'<rect x="4" y="128" width="34" height="40" rx="4" fill="{STEEL}"/>'
+        + '<rect x="8" y="132" width="26" height="30" rx="6" fill="#ffffff"/>'
+        + f'<rect x="146" y="40" width="112" height="134" rx="8" fill="{SHADOW}"/>'
+        + inline(sticker, 140, 32, 112)
+        # knees in the foreground, phone in hand between them
+        + f'<ellipse cx="88" cy="332" rx="112" ry="78" fill="{denim}"/>'
+        + f'<ellipse cx="312" cy="332" rx="112" ry="78" fill="{denim}"/>'
+        + f'<ellipse cx="168" cy="282" rx="22" ry="16" fill="{skin}"/>'
+        + f'<ellipse cx="232" cy="282" rx="22" ry="16" fill="{skin}"/>'
+        + '<rect x="172" y="226" width="56" height="82" rx="9" fill="#1d1a16"/>'
+        + '<rect x="177" y="233" width="46" height="66" rx="5" fill="#ffd23f"/>'
+        + '<rect x="188" y="246" width="24" height="24" fill="#1d1a16"/>'
+        + '<rect x="193" y="251" width="14" height="14" fill="#ffd23f"/>'
+        + '<rect x="186" y="278" width="28" height="5" rx="2" fill="#1d1a16"/>',
+        "The view from a toilet seat: a large QR sticker at eye level on the closed stall door",
     )
 
 
@@ -94,10 +105,8 @@ def urinal_scene(base_url: str) -> SafeString:
         f'fill="{PORCELAIN}" stroke="{STEEL}" stroke-width="4"/>'
         + '<path d="M140 120h120q4 70-60 92-64-22-60-92z" fill="#eef2f3"/>'
         + f'<rect x="188" y="14" width="24" height="28" rx="4" fill="{STEEL}"/>'
-        + inline(sticker, 164, 104, 72)
-        + '<text x="200" y="286" text-anchor="middle" font-size="13" font-family="Georgia, serif" '
-        'font-style="italic" fill="#5c6670">aim improves 80%*</text>',
-        "A small bullseye target sticker inside the back of a urinal",
+        + inline(sticker, 156, 104, 88),
+        "A QR code with a bullseye in its centre, inside the back of a urinal",
     )
 
 

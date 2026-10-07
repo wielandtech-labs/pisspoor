@@ -1,7 +1,14 @@
 import pytest
 
 from venues.models import RESERVED_CODES, Placement, Venue, new_short_code
-from venues.printing import AgreementMissing, preview_sticker, qr_path, render_sticker
+from venues.printing import (
+    AgreementMissing,
+    preview_sticker,
+    qr_matrix,
+    qr_payload,
+    qr_svg,
+    render_sticker,
+)
 
 pytestmark = pytest.mark.django_db
 
@@ -19,7 +26,7 @@ def test_every_product_renders_at_physical_size_with_its_url(venue, product, set
     placement = Placement.objects.create(venue=venue, label="x", product=product)
     svg = render_sticker(placement).svg()
     assert svg.startswith("<svg") and 'in" height="' in svg
-    assert placement.code in svg
+    assert "pisspooridea" not in svg.lower()  # no printed URL: QR and pictures only
 
 
 def test_unsigned_venue_cannot_print(db):
@@ -38,14 +45,17 @@ def test_venue_name_is_escaped_in_artwork(db):
     assert "<script>" not in svg and "&lt;SCRIPT&gt;" in svg
 
 
-def test_qr_path_is_one_path_inside_the_box():
-    svg = qr_path("https://pisspooridea.lol/abc234", 10, 20, 100)
+def test_qr_svg_is_one_path_inside_the_box():
+    svg = qr_svg(qr_matrix("https://pisspooridea.lol/abc234"), 10, 20, 100)
     assert svg.count("<path") == 1 and "translate(10 20)" in svg
 
 
+def test_qr_payload_uses_alphanumeric_mode():
+    assert qr_payload("https://pisspooridea.lol/k7qx2m") == "HTTPS://PISSPOORIDEA.LOL/K7QX2M"
+
+
 def test_preview_sticker_needs_no_database():
-    svg = preview_sticker("large", "https://pisspooridea.lol").svg()
-    assert "pisspooridea.lol/yours" in svg
+    assert preview_sticker("urinal_target", "https://pisspooridea.lol").svg().startswith("<svg")
 
 
 def test_short_codes_avoid_reserved_words_and_confusables():

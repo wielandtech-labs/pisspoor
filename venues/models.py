@@ -12,8 +12,9 @@ import secrets
 from django.conf import settings
 from django.db import models
 
-# No 0/o, 1/l/i: the code is also printed under the QR for people who would
-# rather type it than scan an unexplained QR code in a bathroom.
+# No 0/o, 1/l/i: codes get read aloud and typed (venue staff quoting the board,
+# support). Lowercase only; QR payloads upper-case them (see
+# venues.printing.qr_payload) and the route accepts either case.
 CODE_ALPHABET = "23456789abcdefghjkmnpqrstuvwxyz"
 CODE_LENGTH = 6
 CODE_PATTERN = f"[{CODE_ALPHABET}]{{{CODE_LENGTH}}}"

@@ -97,6 +97,12 @@ Back office is Django admin.
   excluded. Any query that uses `.distinct()` on Scan must call `.order_by()`
   first, because `Scan.Meta.ordering` would otherwise add `created_at` to the
   DISTINCT and make every scan unique (a real bug caught by tests).
+- **Every sticker must decode.** The Bullseye punches a target out of the
+  middle of a level-H QR code; `venues/tests/test_qr_decodes.py` rasterises
+  each design and decodes it with ZXing. Measured limit on the prod URL:
+  hole width 0.38 decodes, 0.40 does not; `BULLSEYE_DIAMETER` is 0.32 for
+  headroom. Changing artwork, the hole size or `PUBLIC_BASE_URL` length means
+  re-running it, and a test print scanned on a real phone before a batch.
 - **The homepage product art is drawn by the print renderers**
   (`venues.printing.preview_sticker`), so marketing never shows a sticker the
   makerspace can't print.
