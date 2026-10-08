@@ -36,6 +36,12 @@ def new_board_token() -> str:
     return secrets.token_urlsafe(24)
 
 
+def new_ntfy_topic() -> str:
+    # ntfy topics allow [A-Za-z0-9_-]; the random part is what keeps a venue's
+    # alerts private, since anyone may read a pp-* topic they can name.
+    return f"pp-{secrets.token_urlsafe(16)}"
+
+
 class Venue(models.Model):
     name = models.CharField(max_length=120)
     slug = models.SlugField(unique=True)
@@ -67,6 +73,15 @@ class Venue(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
+    # Maintenance alerts (feedback/alerts.py). The venue manages these from
+    # its board; notify_email falls back to contact_email when blank.
+    notify_email = models.EmailField(blank=True)
+    email_alerts = models.BooleanField(default=True)
+    push_alerts = models.BooleanField(default=True)
+    ntfy_topic = models.CharField(
+        max_length=64, unique=True, default=new_ntfy_topic, editable=False
+    )
+
     class Meta:
         ordering = ["name"]
 
@@ -76,6 +91,10 @@ class Venue(models.Model):
     @property
     def has_agreement(self) -> bool:
         return self.agreement_signed_on is not None
+
+    @property
+    def alert_email(self) -> str:
+        return self.notify_email or self.contact_email
 
     def social_links(self) -> list[tuple[str, str]]:
         links = [
