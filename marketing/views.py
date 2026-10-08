@@ -40,3 +40,7 @@ def home(request):
 
 def privacy(request):
     return render(request, "marketing/privacy.html")
+
+
+def terms(request):
+    return render(request, "marketing/terms.html")

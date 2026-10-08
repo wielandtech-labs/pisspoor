@@ -111,6 +111,10 @@ Back office is Django admin.
   last `WINDOW_DAYS`), top `TOP_N` only. Ranking is the Bayesian average in
   `feedback/leaderboard.py` (pure `rank()`, table-tested); the network mean
   includes non-listed venues so opting in can't move the bar.
+- **Legal texts are versioned and hash-pinned** (`core/legal.py`, `docs/LEGAL.md`).
+  Venue agreement, advertiser terms: a text change means a new version file +
+  version constant + pinned hash. The contracting party comes from
+  `OPERATOR_LEGAL_NAME`, which must name the formed LLC before relying on them.
 - **Never store a raw IP.** Visitor identity is `scans.visitors.visitor_hash`
   (HMAC of date + client IP + UA + a random one-day `ppv` cookie). It is per
   day by design; don't widen it. The cookie is load-bearing: public HTTPS

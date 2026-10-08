@@ -2,23 +2,23 @@
 
 from __future__ import annotations
 
-import hashlib
 from datetime import timedelta
 
 from django import forms
 from django.conf import settings
 from django.db import transaction
-from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.text import slugify
 
+from core.legal import render_legal, sha256
 from core.notify import notify_owner, send_email
 from feedback.alerts import board_url
 
 from .models import AgreementAcceptance, Placement, SamplePackRequest, Venue
 
-AGREEMENT_VERSION = "2026-10-v1"
-AGREEMENT_TEMPLATE = "venues/agreement_v1.html"
+# v1 (2026-10-v1) stays on disk: acceptances store their full text anyway.
+AGREEMENT_VERSION = "2026-10-v2"
+AGREEMENT_TEMPLATE = "venues/agreement_v2.html"
 
 STARTER_PACK = {
     Placement.Product.LARGE: 2,
@@ -35,11 +35,11 @@ SHORT_NAMES = {
 
 
 def agreement_text() -> str:
-    return render_to_string(AGREEMENT_TEMPLATE).strip()
+    return render_legal(AGREEMENT_TEMPLATE)
 
 
 def agreement_sha256() -> str:
-    return hashlib.sha256(agreement_text().encode()).hexdigest()
+    return sha256(agreement_text())
 
 
 class VenueSignupForm(forms.Form):
