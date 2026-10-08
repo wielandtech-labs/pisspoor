@@ -63,6 +63,11 @@ DEFAULT_FROM_EMAIL = os.environ.get(
 NTFY_URL = os.environ.get("NTFY_URL", "")  # where we publish (in-cluster)
 NTFY_PUBLIC_URL = os.environ.get("NTFY_PUBLIC_URL", "https://ntfy.wielandtech.com").rstrip("/")
 NTFY_TOKEN = os.environ.get("NTFY_TOKEN", "")
+# Where new-signup / new-ad alerts go (core.notify.notify_owner).
+OWNER_EMAIL = os.environ.get("OWNER_EMAIL", "")
+OWNER_NTFY_TOPIC = os.environ.get("OWNER_NTFY_TOPIC", "")
+# Back-office link used in owner alerts; prod points at the tailnet admin host.
+ADMIN_URL = os.environ.get("ADMIN_URL", PUBLIC_BASE_URL + "/admin/")
 
 # Keys the daily visitor hash. Rotating it only resets dedup for the current
 # day; no raw IP is ever stored, so there is nothing else to re-key.

@@ -24,7 +24,7 @@
           and you get a cut of every ad dollar it earns.
         </p>
         <div class="cta-row">
-          <a class="btn" href="#contact">Put us in your bathroom</a>
+          <a class="btn" href="{% url 'venues:join' %}">Put us in your bathroom</a>
           <a class="btn ghost" href="#money">Show me the money</a>
         </div>
       </div>
@@ -132,7 +132,7 @@
       <div>
         <div class="kicker">Get stuck</div>
         <h2>Got a bathroom? Got something to sell?</h2>
-        <p>Venues: tell us about your spot and we'll come by with a sample. Advertisers: ask about launch pricing for the first network-wide campaign, and read our <a href="{% url 'ads:policy' %}">ad policy</a> first.</p>
+        <p>Venues: <a href="{% url 'venues:join' %}">sign up and get a free sample pack</a> in about five minutes, or tell us about your spot here and we'll reach out. Advertisers: ask about launch pricing for the first network-wide campaign, and read our <a href="{% url 'ads:policy' %}">ad policy</a> first.</p>
         <p class="fine">Every placement starts with a one-page agreement with the venue, and you can have the stickers taken down anytime.</p>
       </div>
       <div>

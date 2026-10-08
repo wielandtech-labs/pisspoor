@@ -29,7 +29,9 @@ NEXT_STATUS = {
 
 
 def _venue(token: str) -> Venue:
-    return get_object_or_404(Venue, board_token=token, active=True)
+    # Inactive venues keep their board: a new venue gets its link at signup,
+    # before verification, and a paused venue can still read its history.
+    return get_object_or_404(Venue, board_token=token)
 
 
 def board(request: HttpRequest, token: str) -> HttpResponse:

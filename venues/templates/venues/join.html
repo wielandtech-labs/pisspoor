@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Get a free sample pack · pisspooridea.{{ brand_tld }}{% endblock %}
+{% block description %}Sign up your venue: free QR stickers for your restrooms, a share of the ad revenue, and alerts when something needs fixing.{% endblock %}
+{% block body %}
+<main class="landing" style="max-width:720px">
+  <a class="logo" href="/">piss<span style="color:var(--red)">poor</span>idea.{{ brand_tld }}</a>
+  <h1 style="margin-top:20px">Put us in your bathroom</h1>
+  <p>Five minutes, no cost. We verify you run the venue, mail you a free sample pack, and you stick them up. You earn a share of ad revenue from every scan.</p>
+
+  {% if error %}<div class="notice warn" role="alert">{{ error }}</div>{% endif %}
+  {% if form.non_field_errors %}<div class="notice warn" role="alert">{{ form.non_field_errors|join:" " }}</div>{% endif %}
+
+  <form method="post" novalidate>
+    {% csrf_token %}
+    <div class="card">
+      <h2 style="font-size:1.3rem">Your venue</h2>
+      {% for field in form %}{% if field.name in "venue_name address contact_name contact_email phone" %}
+      <div class="field"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{{ field.errors }}</div>
+      {% endif %}{% endfor %}
+    </div>
+
+    <div class="card">
+      <h2 style="font-size:1.3rem">Your socials <span class="fine">(optional)</span></h2>
+      <p class="fine" style="margin-top:0">Guests who scan your stickers see these links. Paste full URLs.</p>
+      {% for field in form %}{% if field.name in "website_url instagram_url facebook_url tiktok_url google_reviews_url" %}
+      <div class="field"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{{ field.errors }}</div>
+      {% endif %}{% endfor %}
+    </div>
+
+    <div class="card">
+      <h2 style="font-size:1.3rem">Your sample pack</h2>
+      <div class="checks">
+        {% for radio in form.pack %}<label>{{ radio.tag }} {{ radio.choice_label }}{% if radio.data.value == "starter" %}: 2 Big Splash (stall doors), 1 Branded (by the mirror), 1 Bullseye (urinal){% endif %}</label>{% endfor %}
+      </div>
+      <p class="fine">Custom: how many of each (up to 12 total).</p>
+      <div class="counts">
+        <div class="field"><label for="id_count_large">Big Splash</label>{{ form.count_large }}</div>
+        <div class="field"><label for="id_count_branded">Branded</label>{{ form.count_branded }}</div>
+        <div class="field"><label for="id_count_urinal_target">Bullseye</label>{{ form.count_urinal_target }}</div>
+      </div>
+      <div class="field"><label for="id_ship_to_name">{{ form.ship_to_name.label }}</label>{{ form.ship_to_name }}{{ form.ship_to_name.errors }}</div>
+      <div class="field"><label for="id_ship_to_address">{{ form.ship_to_address.label }}</label>{{ form.ship_to_address }}{{ form.ship_to_address.errors }}</div>
+    </div>
+
+    <div class="card checks">
+      <h2 style="font-size:1.3rem">Your choices</h2>
+      <label>{{ form.show_on_leaderboard }} {{ form.show_on_leaderboard.label }}</label>
+      <label>{{ form.allow_political_ads }} {{ form.allow_political_ads.label }} <span class="fine">(labeled, with "paid for by" disclaimers)</span></label>
+      <p class="fine">You can change both, and set up maintenance alerts, from your venue board anytime.</p>
+    </div>
+
+    <div class="card">
+      <h2 style="font-size:1.3rem">The agreement</h2>
+      <div class="agreement" tabindex="0" aria-label="Placement agreement">{% include agreement_template %}</div>
+      <div class="field" style="margin-top:14px"><label for="id_signer_name">{{ form.signer_name.label }}</label>{{ form.signer_name }}{{ form.signer_name.errors }}</div>
+      <div class="field"><label for="id_signer_title">{{ form.signer_title.label }}</label>{{ form.signer_title }}{{ form.signer_title.errors }}</div>
+      <div class="checks">
+        <label>{{ form.authorized }} {{ form.authorized.label }}</label>{{ form.authorized.errors }}
+        <label>{{ form.agree }} {{ form.agree.label }}</label>{{ form.agree.errors }}
+      </div>
+      <p class="fine">Typing your name and ticking these boxes signs agreement version {{ agreement_version }}. We keep a copy of the exact text you agreed to.</p>
+    </div>
+
+    <div class="hp" aria-hidden="true"><label for="id_fax_number">Leave this empty</label>{{ form.fax_number }}</div>
+    <button class="btn" type="submit" style="margin-top:16px">Sign up and request my pack</button>
+  </form>
+</main>
+{% endblock %}

@@ -110,3 +110,10 @@ def test_board_aggregates_ratings_once(client, rated, django_assert_max_num_quer
     with django_assert_max_num_queries(2):  # one aggregate + the listed-venues query
         standing, _ = venue_standing(venue)
     assert standing.rank == 1
+
+
+def test_unverified_venue_is_told_verification_is_the_blocker(client, rated):
+    venue = rated("Pending", 5, 12, active=False)
+    body = client.get(f"/b/{venue.board_token}").content.decode()
+    assert "once your venue is verified" in body
+    assert "outside the top 10" not in body

@@ -2,7 +2,7 @@ import pytest
 
 from venues.models import RESERVED_CODES, Placement, Venue, new_short_code
 from venues.printing import (
-    AgreementMissing,
+    NotPrintable,
     preview_sticker,
     qr_matrix,
     qr_payload,
@@ -32,7 +32,7 @@ def test_every_product_renders_at_physical_size_with_its_url(venue, product, set
 def test_unsigned_venue_cannot_print(db):
     venue = Venue.objects.create(name="No Contract", slug="nope")
     placement = Placement.objects.create(venue=venue, label="x")
-    with pytest.raises(AgreementMissing):
+    with pytest.raises(NotPrintable):
         render_sticker(placement)
 
 
