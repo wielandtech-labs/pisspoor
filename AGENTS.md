@@ -86,6 +86,12 @@ Back office is Django admin.
 - **Short codes share the URL root** (`/<code>`). `scans.urls` is included
   last, and any fixed route whose path could match the code pattern
   (`[2-9a-z minus confusables]{6}`) must be added to `RESERVED_CODES`.
+- **The back office is tailnet-only in prod.** `/admin` and `/print/` 404 on
+  every host but `ADMIN_HOSTS` (prod: the Tailscale ingress hostname
+  `pisspoor-admin.iguanodon-alioth.ts.net`). Never point `ADMIN_HOSTS` at
+  `pisspoor.k8s.local`: public Traefik routes by Host header, so that LAN name
+  is reachable from the internet (tested 2026-10-07), and prod's secure-only
+  cookies break login over plain HTTP anyway.
 - **Never store a raw IP.** Visitor identity is `scans.visitors.visitor_hash`
   (HMAC of date + client IP + UA + a random one-day `ppv` cookie). It is per
   day by design; don't widen it. The cookie is load-bearing: public HTTPS
