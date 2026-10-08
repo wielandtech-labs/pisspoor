@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block title %}{{ venue.name }}: alert settings{% endblock %}
-{% block head %}<meta name="robots" content="noindex"><meta name="referrer" content="no-referrer">{% endblock %}
+{% block head %}<meta name="robots" content="noindex"><meta name="referrer" content="same-origin">{% endblock %}
 {% block body %}
 <main class="board" style="max-width:640px">
   <div class="kicker"><a href="{% url 'feedback:board' venue.board_token %}">← Back to the board</a></div>
