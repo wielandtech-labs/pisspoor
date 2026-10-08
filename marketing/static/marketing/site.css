@@ -189,3 +189,4 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
   .stars label { font-size: 1.8rem; }
   .card { padding: 14px; }
 }
+code, .board a { overflow-wrap: anywhere; }

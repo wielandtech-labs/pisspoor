@@ -4,15 +4,20 @@ from __future__ import annotations
 
 from datetime import timedelta
 
-from django.db.models import Avg
+from django import forms
+from django.conf import settings
+from django.db.models import Avg, Q
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
+from core.models import NotificationLog
 from scans.payouts import unique_scans_by_venue
 from venues.models import Venue
 
+from .alerts import send_test_alert
 from .models import MaintenanceRequest, Rating
 
 NEXT_STATUS = {
@@ -60,3 +65,55 @@ def update_request(request: HttpRequest, token: str, pk: int) -> HttpResponse:
         item.resolved_at = timezone.now() if status == MaintenanceRequest.Status.RESOLVED else None
         item.save(update_fields=["status", "resolved_at"])
     return redirect("feedback:board", token=token)
+
+
+class AlertSettingsForm(forms.ModelForm):
+    class Meta:
+        model = Venue
+        fields = ["notify_email", "email_alerts", "push_alerts"]
+        labels = {
+            "notify_email": "Send alerts to",
+            "email_alerts": "Email me when something needs attention",
+            "push_alerts": "Push to phones subscribed in the ntfy app",
+        }
+
+
+def alerts(request: HttpRequest, token: str) -> HttpResponse:
+    """Alert settings live off the board: the board auto-refreshes, which would
+    wipe a half-typed email address."""
+    venue = _venue(token)
+    form = AlertSettingsForm(request.POST or None, instance=venue)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        return redirect(f"{request.path}?saved=1")
+    host = settings.NTFY_PUBLIC_URL.split("://", 1)[-1]
+    response = render(
+        request,
+        "feedback/alerts.html",
+        {
+            "venue": venue,
+            "form": form,
+            "saved": request.GET.get("saved") == "1",
+            "tested": request.GET.get("tested", ""),
+            "ntfy_web": f"{settings.NTFY_PUBLIC_URL}/{venue.ntfy_topic}",
+            "ntfy_app": f"ntfy://{host}/{venue.ntfy_topic}",
+            "ntfy_server": settings.NTFY_PUBLIC_URL,
+        },
+    )
+    response["X-Robots-Tag"] = "noindex"
+    return response
+
+
+@require_POST
+def test_alert(request: HttpRequest, token: str) -> HttpResponse:
+    venue = _venue(token)
+    settings_url = reverse("feedback:alerts", args=[token])
+    recent = NotificationLog.objects.filter(
+        Q(target=venue.alert_email) | Q(target=venue.ntfy_topic),
+        subject__endswith="Test alert",
+        created_at__gte=timezone.now() - timedelta(minutes=1),
+    ).exists()
+    if recent:
+        return redirect(f"{settings_url}?tested=wait")
+    send_test_alert(venue)
+    return redirect(f"{settings_url}?tested=1")

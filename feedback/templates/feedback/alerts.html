@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}{{ venue.name }}: alert settings{% endblock %}
+{% block head %}<meta name="robots" content="noindex"><meta name="referrer" content="no-referrer">{% endblock %}
+{% block body %}
+<main class="board" style="max-width:640px">
+  <div class="kicker"><a href="{% url 'feedback:board' venue.board_token %}">← Back to the board</a></div>
+  <h1 style="margin:8px 0 18px">Alerts for {{ venue.name }}</h1>
+
+  {% if saved %}<div class="notice" role="status">Saved.</div>{% endif %}
+  {% if tested == "1" %}<div class="notice" role="status">Test alert sent. Check your email and phone.</div>
+  {% elif tested == "wait" %}<div class="notice warn" role="status">Test sent less than a minute ago. Give it a moment.</div>{% endif %}
+
+  <div class="card">
+    <h2 style="font-size:1.3rem">When a guest reports a problem</h2>
+    <form method="post">
+      {% csrf_token %}
+      <div class="field"><label for="id_notify_email">{{ form.notify_email.label }}</label>{{ form.notify_email }}
+        {{ form.notify_email.errors }}
+        <span class="fine">Leave blank to use {{ venue.contact_email|default:"your contact email" }}.</span></div>
+      <div class="field"><label>{{ form.email_alerts }} {{ form.email_alerts.label }}</label></div>
+      <div class="field"><label>{{ form.push_alerts }} {{ form.push_alerts.label }}</label></div>
+      <button class="btn" type="submit">Save</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2 style="font-size:1.3rem">Get alerts on staff phones</h2>
+    <ol>
+      <li>Install the free <strong>ntfy</strong> app (iPhone or Android).</li>
+      <li>On the phone, <a href="{{ ntfy_app }}">tap here to subscribe</a>.
+        If that doesn't open the app: in ntfy, add a subscription, choose "use another server",
+        enter <code>{{ ntfy_server }}</code>, and the topic <code>{{ venue.ntfy_topic }}</code>.</li>
+      <li>Any number of staff can subscribe. No account needed.</li>
+    </ol>
+    <p class="fine">Keep this topic name private: anyone who has it can read your alerts. Or watch them in a browser: <a href="{{ ntfy_web }}">{{ ntfy_web }}</a></p>
+  </div>
+
+  <form method="post" action="{% url 'feedback:test_alert' venue.board_token %}">
+    {% csrf_token %}
+    <button class="btn ghost" type="submit">Send a test alert</button>
+  </form>
+</main>
+{% endblock %}
