@@ -44,10 +44,11 @@ AGENCY_URL = os.environ.get("AGENCY_URL", "https://pisspooridea.com").rstrip("/"
 # See core/middleware.py.
 ADMIN_HOSTS = [host.lower() for host in _env_list("ADMIN_HOSTS")]
 
-# Notifications (core/notify.py). Without EMAIL_HOST, emails print to the log
-# instead of sending; without NTFY_URL, pushes are skipped.
+# Notifications (core/notify.py). Without EMAIL_HOST and a password, emails
+# print to the log instead of sending (prod sets the host before the sealed
+# password exists); without NTFY_URL, pushes are skipped.
 EMAIL_HOST = os.environ.get("EMAIL_HOST", "")
-if EMAIL_HOST:
+if EMAIL_HOST and os.environ.get("EMAIL_HOST_PASSWORD"):
     EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
     EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "465"))
     EMAIL_USE_SSL = _env_bool("EMAIL_USE_SSL", True)
