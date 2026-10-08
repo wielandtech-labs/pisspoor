@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import timedelta
 
+from django.db import transaction
 from django.db.models import Avg
 from django.http import Http404, HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -11,6 +12,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from ads.models import AdClick, Campaign, pick_campaign
+from feedback.alerts import alert_venue
 from feedback.models import (
     MaintenanceRequest,
     Rating,
@@ -107,12 +109,20 @@ def report(request: HttpRequest, code: str) -> HttpResponse:
     visitor = visitor_hash(request)
     if report_limit_reached(visitor):
         return _back(placement, "slowdown")
-    MaintenanceRequest.objects.create(
+    already_open = MaintenanceRequest.objects.filter(
+        placement=placement,
+        issue=issue,
+        status__in=[MaintenanceRequest.Status.OPEN, MaintenanceRequest.Status.ACK],
+    ).exists()
+    maintenance = MaintenanceRequest.objects.create(
         placement=placement,
         issue=issue,
         note=request.POST.get("note", "").strip()[:280],
         visitor_hash=visitor,
     )
+    # Five people reporting "no TP" is one problem, so one alert.
+    if not already_open:
+        transaction.on_commit(lambda: alert_venue(maintenance))
     return _back(placement, "reported")
 
 

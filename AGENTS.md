@@ -92,6 +92,14 @@ Back office is Django admin.
   `pisspoor.k8s.local`: public Traefik routes by Host header, so that LAN name
   is reachable from the internet (tested 2026-10-07), and prod's secure-only
   cookies break login over plain HTTP anyway.
+- **Notifications never break the request.** `core.notify.send_email` /
+  `send_push` swallow failures and write a `NotificationLog` row (admin) instead;
+  callers send them via `transaction.on_commit`. Without `EMAIL_HOST` emails go
+  to the console (pod log); without `NTFY_URL` pushes are skipped. Maintenance
+  alerts dedupe on an already-open request for the same sticker + issue.
+- **A venue's ntfy topic is its secret.** Prod ntfy allows anonymous read *and*
+  publish on `pp-*` topics (staff subscribe without accounts, the app publishes
+  without a token); privacy comes only from the random `Venue.ntfy_topic`. Never derive it from anything guessable.
 - **Never use `<meta name="referrer" content="no-referrer">`.** Browsers then
   send `Origin: null` on the page's own POSTs and Django's CSRF check 403s
   them; the test client sends no Origin, so only a real browser catches it

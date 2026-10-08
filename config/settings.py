@@ -44,6 +44,26 @@ AGENCY_URL = os.environ.get("AGENCY_URL", "https://pisspooridea.com").rstrip("/"
 # See core/middleware.py.
 ADMIN_HOSTS = [host.lower() for host in _env_list("ADMIN_HOSTS")]
 
+# Notifications (core/notify.py). Without EMAIL_HOST and a password, emails
+# print to the log instead of sending (prod sets the host before the sealed
+# password exists); without NTFY_URL, pushes are skipped.
+EMAIL_HOST = os.environ.get("EMAIL_HOST", "")
+if EMAIL_HOST and os.environ.get("EMAIL_HOST_PASSWORD"):
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+    EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "465"))
+    EMAIL_USE_SSL = _env_bool("EMAIL_USE_SSL", True)
+    EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
+    EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
+else:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+EMAIL_TIMEOUT = 5
+DEFAULT_FROM_EMAIL = os.environ.get(
+    "DEFAULT_FROM_EMAIL", '"Piss Poor Idea" <no-reply@wielandtech.com>'
+)
+NTFY_URL = os.environ.get("NTFY_URL", "")  # where we publish (in-cluster)
+NTFY_PUBLIC_URL = os.environ.get("NTFY_PUBLIC_URL", "https://ntfy.wielandtech.com").rstrip("/")
+NTFY_TOKEN = os.environ.get("NTFY_TOKEN", "")
+
 # Keys the daily visitor hash. Rotating it only resets dedup for the current
 # day; no raw IP is ever stored, so there is nothing else to re-key.
 SCAN_HASH_SECRET = os.environ.get("SCAN_HASH_SECRET", SECRET_KEY)

@@ -54,6 +54,8 @@
   </div>
   {% endif %}
 
+  <p class="fine"><a href="{% url 'feedback:alerts' venue.board_token %}">Alert settings</a> ·
+    {% if venue.email_alerts or venue.push_alerts %}alerts are on{% if venue.email_alerts %} (email to {{ venue.alert_email|default:"nobody yet" }}){% endif %}{% else %}alerts are off{% endif %}</p>
   <p class="fine">Your stickers: {% for p in placements %}{{ p.label }} ({{ p.code }}){% if not forloop.last %}, {% endif %}{% endfor %}. This page refreshes every 2 minutes.</p>
 </main>
 {% endblock %}
