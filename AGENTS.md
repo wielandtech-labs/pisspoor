@@ -92,6 +92,12 @@ Back office is Django admin.
   `pisspoor.k8s.local`: public Traefik routes by Host header, so that LAN name
   is reachable from the internet (tested 2026-10-07), and prod's secure-only
   cookies break login over plain HTTP anyway.
+- **Never use `<meta name="referrer" content="no-referrer">`.** Browsers then
+  send `Origin: null` on the page's own POSTs and Django's CSRF check 403s
+  them; the test client sends no Origin, so only a real browser catches it
+  (shipped broken on the venue board, 2026-10-08). Use `same-origin`, which
+  still keeps secret-token URLs out of referrers to other sites. Guarded by
+  `core/tests/test_referrer_policy.py`.
 - **Never store a raw IP.** Visitor identity is `scans.visitors.visitor_hash`
   (HMAC of date + client IP + UA + a random one-day `ppv` cookie). It is per
   day by design; don't widen it. The cookie is load-bearing: public HTTPS
