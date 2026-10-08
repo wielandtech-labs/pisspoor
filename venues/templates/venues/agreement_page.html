@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Venue placement agreement · pisspooridea.{{ brand_tld }}{% endblock %}
+{% block body %}
+<main class="landing" style="max-width:720px">
+  <a class="logo" href="/">piss<span style="color:var(--red)">poor</span>idea.{{ brand_tld }}</a>
+  {% include agreement_template %}
+  <p><a class="btn" href="{% url 'venues:join' %}">Sign up your venue</a></p>
+</main>
+{% endblock %}

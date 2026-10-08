@@ -70,3 +70,10 @@ def send_push(topic: str, title: str, message: str, click_url: str = "") -> bool
     except Exception as exc:  # noqa: BLE001 - network/HTTP errors are logged, never raised
         return _record(NotificationLog.Channel.PUSH, topic, title, str(exc)[:500] or repr(exc))
     return _record(NotificationLog.Channel.PUSH, topic, title)
+
+
+def notify_owner(subject: str, body: str, link: str = "") -> None:
+    """Alert the business owner (new signups, ads to review)."""
+    text = f"{body}\n\n{link}" if link else body
+    send_email(settings.OWNER_EMAIL, subject, text)
+    send_push(settings.OWNER_NTFY_TOPIC, subject, body, link)

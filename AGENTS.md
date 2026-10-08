@@ -133,6 +133,16 @@ Back office is Django admin.
   hole width 0.38 decodes, 0.40 does not; `BULLSEYE_DIAMETER` is 0.32 for
   headroom. Changing artwork, the hole size or `PUBLIC_BASE_URL` length means
   re-running it, and a test print scanned on a real phone before a batch.
+- **Self-serve venues start inactive.** `/venues/join` creates the venue with
+  `active=False`, a signed `AgreementAcceptance` and a `SamplePackRequest`.
+  Inactive = stickers 404 and nothing prints (`venues.printing.print_blocker`
+  checks agreement AND active) until the owner runs "Mark verified" on the pack.
+  This is what stops someone signing up a bar they don't own and getting
+  stickers to put up there; don't add an auto-verify.
+- **The agreement text is versioned and pinned.** Editing
+  `venues/templates/venues/agreement_v1.html` without a new
+  `AGREEMENT_VERSION` (and template) fails `test_agreement_text_matches_its_version`.
+  Each acceptance stores the full text it signed.
 - **No ad runs without human approval, and approval is pinned to the link.**
   `Campaign.objects.live()` only returns `status=approved`; status changes
   only via `approve()`/`reject()` (admin actions), and saving an approved

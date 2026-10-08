@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}You're signed up · pisspooridea.{{ brand_tld }}{% endblock %}
+{% block head %}<meta name="robots" content="noindex"><meta name="referrer" content="same-origin">{% endblock %}
+{% block body %}
+<main class="landing" style="max-width:640px">
+  <a class="logo" href="/">piss<span style="color:var(--red)">poor</span>idea.{{ brand_tld }}</a>
+  <h1 style="margin-top:20px">{{ venue.name }} is signed up 🎉</h1>
+  <ol>
+    <li><strong>We verify.</strong> We'll call or email {{ venue.contact_email }} to confirm you run the venue.</li>
+    <li><strong>We ship.</strong> Your sample pack ({{ venue.placements.count }} sticker{{ venue.placements.count|pluralize }}) goes in the mail.</li>
+    <li><strong>You stick.</strong> Put them up where guests will see them. They go live when they arrive.</li>
+  </ol>
+  <div class="card">
+    <h2 style="font-size:1.3rem">Your private venue board</h2>
+    <p>Maintenance reports, ratings, alerts and the leaderboard live here. Bookmark it and share it with your staff only; we've also emailed it to you.</p>
+    <a class="btn" href="{% url 'feedback:board' venue.board_token %}">Open my board</a>
+  </div>
+</main>
+{% endblock %}

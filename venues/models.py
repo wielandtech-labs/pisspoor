@@ -142,3 +142,59 @@ class Placement(models.Model):
     @property
     def display_url(self) -> str:
         return self.short_url.split("://", 1)[-1]
+
+
+class AgreementAcceptance(models.Model):
+    """A click-through signature: who accepted which exact text, and when.
+
+    The full text is stored alongside its hash, so a later edit to the
+    template can never change what a venue is on record as having signed.
+    """
+
+    venue = models.ForeignKey(Venue, on_delete=models.PROTECT, related_name="acceptances")
+    version = models.CharField(max_length=20)
+    text = models.TextField()
+    text_sha256 = models.CharField(max_length=64)
+    signer_name = models.CharField(max_length=120)
+    signer_title = models.CharField(max_length=120)
+    signer_email = models.EmailField()
+    visitor_hash = models.CharField(max_length=64, db_index=True)
+    accepted_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-accepted_at"]
+
+    def __str__(self) -> str:
+        return f"{self.venue} · {self.version} · {self.signer_name}"
+
+
+class SamplePackRequest(models.Model):
+    """The shipping queue for a new venue's first stickers.
+
+    Nothing prints until the owner verifies the signer really runs the venue
+    (status VERIFIED activates the venue): otherwise anyone could "onboard" a
+    bar they don't own and receive stickers to put up there.
+    """
+
+    class Status(models.TextChoices):
+        REQUESTED = "requested", "Requested (verify the signer)"
+        VERIFIED = "verified", "Verified"
+        PRINTED = "printed", "Printed"
+        SHIPPED = "shipped", "Shipped"
+
+    venue = models.ForeignKey(Venue, on_delete=models.PROTECT, related_name="sample_packs")
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.REQUESTED)
+    ship_to_name = models.CharField(max_length=120)
+    ship_to_address = models.TextField()
+    phone = models.CharField(max_length=40, blank=True)
+    tracking_number = models.CharField(max_length=80, blank=True)
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    verified_at = models.DateTimeField(null=True, blank=True)
+    shipped_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self) -> str:
+        return f"{self.venue} · {self.get_status_display()}"

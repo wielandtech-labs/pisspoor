@@ -38,8 +38,17 @@ QUIET_ZONE = 2  # modules; the sticker border supplies the rest
 BULLSEYE_DIAMETER = 0.32
 
 
-class AgreementMissing(Exception):
-    """Raised when asked to print for a venue that has not signed."""
+class NotPrintable(Exception):
+    """Raised when asked to print for a venue that hasn't signed or isn't verified."""
+
+
+def print_blocker(venue) -> str:
+    """Why this venue's stickers can't be printed yet, or "" if they can."""
+    if not venue.has_agreement:
+        return f"{venue} has no signed placement agreement. No contract, no stickers."
+    if not venue.active:
+        return f"{venue} isn't verified yet. Verify the signer (sample pack queue) first."
+    return ""
 
 
 @dataclass(frozen=True)
@@ -200,8 +209,9 @@ RENDERERS = {
 
 
 def render_sticker(placement: Placement) -> Sticker:
-    if not placement.venue.has_agreement:
-        raise AgreementMissing(f"{placement.venue} has no signed placement agreement.")
+    blocker = print_blocker(placement.venue)
+    if blocker:
+        raise NotPrintable(blocker)
     return RENDERERS[placement.product](placement)
 
 
