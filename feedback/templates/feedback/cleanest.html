@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Cleanest bathrooms · pisspooridea.{{ brand_tld }}{% endblock %}
+{% block description %}The cleanest restrooms in the Piss Poor Idea network, as rated by the people who used them.{% endblock %}
+{% block body %}
+<main class="landing" style="max-width:720px">
+  <a class="logo" href="/">piss<span style="color:var(--red)">poor</span>idea.{{ brand_tld }}</a>
+  <h1 style="margin-top:20px">Cleanest bathrooms</h1>
+  <p>Rated by the people who actually used them. Ranked over the last {{ window_days }} days; a venue needs {{ min_ratings }} ratings to qualify, and the ranking weighs how many ratings a score is based on, not just the average.</p>
+
+  {% for standing, venue in rows %}
+  <div class="card" style="display:flex;gap:16px;align-items:center">
+    <div class="score" aria-label="Rank {{ standing.rank }}">#{{ standing.rank }}</div>
+    <div style="flex:1;min-width:0">
+      <h2 style="font-size:1.25rem;margin:0">{{ venue.name }}</h2>
+      <div>{{ standing.average|floatformat:1 }} / 5 <span class="fine">({{ standing.count }} rating{{ standing.count|pluralize }})</span></div>
+      {% with links=venue.social_links %}{% if links %}
+      <div class="socials" style="justify-content:flex-start">{% for label, url in links %}<a href="{{ url }}" target="_blank" rel="noopener">{{ label }}</a>{% endfor %}</div>
+      {% endif %}{% endwith %}
+    </div>
+  </div>
+  {% empty %}
+  <div class="card">
+    <p style="margin:0">No venue has qualified yet. Scan a sticker, rate the restroom, and this page fills up.</p>
+  </div>
+  {% endfor %}
+
+  <p class="fine" style="margin-top:20px">Venues choose whether to appear here. <a href="{% url 'marketing:home' %}">Want your bathroom on this list?</a></p>
+</main>
+{% endblock %}

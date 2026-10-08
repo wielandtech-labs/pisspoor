@@ -100,6 +100,11 @@ Back office is Django admin.
 - **A venue's ntfy topic is its secret.** Prod ntfy allows anonymous *read* on
   `pp-*` topics so staff can subscribe without accounts; privacy comes only from
   the random `Venue.ntfy_topic`. Never derive it from anything guessable.
+- **The leaderboard never shames.** `/cleanest` lists only venues that opted
+  in (`show_on_leaderboard`, default off) and qualify (`MIN_RATINGS` in the
+  last `WINDOW_DAYS`), top `TOP_N` only. Ranking is the Bayesian average in
+  `feedback/leaderboard.py` (pure `rank()`, table-tested); the network mean
+  includes non-listed venues so opting in can't move the bar.
 - **Never store a raw IP.** Visitor identity is `scans.visitors.visitor_hash`
   (HMAC of date + client IP + UA + a random one-day `ppv` cookie). It is per
   day by design; don't widen it. The cookie is load-bearing: public HTTPS

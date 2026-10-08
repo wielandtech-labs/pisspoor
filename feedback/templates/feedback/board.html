@@ -54,6 +54,20 @@
   </div>
   {% endif %}
 
+  <div class="card">
+    <h2 style="font-size:1.4rem">Cleanest bathrooms leaderboard</h2>
+    {% if venue.show_on_leaderboard %}
+      {% if standing %}<p>You're <strong>#{{ standing.rank }}</strong> on the <a href="{% url 'feedback:cleanest' %}">public leaderboard</a>.</p>
+      {% elif not venue.active %}<p>You're opted in. You'll be ranked once your venue is verified and your stickers are live.</p>
+      {% elif ratings_needed %}<p>You're opted in. {{ ratings_needed }} more rating{{ ratings_needed|pluralize }} in the last 90 days and you'll be ranked.</p>
+      {% else %}<p>You're opted in and ranked outside the top 10 shown publicly. Keep it clean.</p>{% endif %}
+      <form method="post" action="{% url 'feedback:toggle_leaderboard' venue.board_token %}">{% csrf_token %}<input type="hidden" name="show" value="0"><button class="btn ghost">Leave the leaderboard</button></form>
+    {% else %}
+      <p>Show off a clean restroom: opted-in venues with enough ratings are ranked on our public <a href="{% url 'feedback:cleanest' %}">cleanest bathrooms</a> page. Only the top is shown; nobody is listed at the bottom.</p>
+      <form method="post" action="{% url 'feedback:toggle_leaderboard' venue.board_token %}">{% csrf_token %}<input type="hidden" name="show" value="1"><button class="btn">Join the leaderboard</button></form>
+    {% endif %}
+  </div>
+
   <p class="fine"><a href="{% url 'feedback:alerts' venue.board_token %}">Alert settings</a> ·
     {% if venue.email_alerts or venue.push_alerts %}alerts are on{% if venue.email_alerts %} (email to {{ venue.alert_email|default:"nobody yet" }}){% endif %}{% else %}alerts are off{% endif %}</p>
   <p class="fine">Your stickers: {% for p in placements %}{{ p.label }} ({{ p.code }}){% if not forloop.last %}, {% endif %}{% endfor %}. This page refreshes every 2 minutes.</p>
