@@ -41,7 +41,10 @@
       <div>
         <h2>Spotted one in the wild?</h2>
         <p>That venue gets a cut of every ad dollar its stickers earn. Scan it, rate it, and tell your favorite bar it's missing out.</p>
-        <a class="btn" href="{{ agency_url }}/">See the grown-up version</a>
+        <div class="cta-row">
+          <a class="btn" href="{% url 'feedback:cleanest' %}">See the cleanest bathrooms</a>
+          <a class="btn ghost" href="{{ agency_url }}/">See the grown-up version</a>
+        </div>
       </div>
     </div>
   </section>

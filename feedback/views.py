@@ -18,6 +18,7 @@ from scans.payouts import unique_scans_by_venue
 from venues.models import Venue
 
 from .alerts import send_test_alert
+from .leaderboard import MIN_RATINGS, TOP_N, WINDOW_DAYS, standings, venue_standing
 from .models import MaintenanceRequest, Rating
 
 NEXT_STATUS = {
@@ -37,6 +38,7 @@ def board(request: HttpRequest, token: str) -> HttpResponse:
     since = now - timedelta(days=30)
     requests = MaintenanceRequest.objects.filter(placement__venue=venue).select_related("placement")
     ratings = Rating.objects.filter(placement__venue=venue, created_at__gte=since)
+    standing, ratings_needed = venue_standing(venue)
     response = render(
         request,
         "feedback/board.html",
@@ -49,6 +51,8 @@ def board(request: HttpRequest, token: str) -> HttpResponse:
             "recent_comments": ratings.exclude(comment="").select_related("placement")[:10],
             "unique_scans": unique_scans_by_venue(since, now, venue.pk)[venue.pk],
             "placements": venue.placements.filter(active=True),
+            "standing": standing,
+            "ratings_needed": ratings_needed,
         },
     )
     response["X-Robots-Tag"] = "noindex"
@@ -117,3 +121,25 @@ def test_alert(request: HttpRequest, token: str) -> HttpResponse:
         return redirect(f"{settings_url}?tested=wait")
     send_test_alert(venue)
     return redirect(f"{settings_url}?tested=1")
+
+
+@require_POST
+def toggle_leaderboard(request: HttpRequest, token: str) -> HttpResponse:
+    venue = _venue(token)
+    venue.show_on_leaderboard = request.POST.get("show") == "1"
+    venue.save(update_fields=["show_on_leaderboard"])
+    return redirect("feedback:board", token=token)
+
+
+def cleanest(request: HttpRequest) -> HttpResponse:
+    top = standings()[:TOP_N]
+    venues = {v.pk: v for v in Venue.objects.filter(pk__in=[s.key for s in top])}
+    return render(
+        request,
+        "feedback/cleanest.html",
+        {
+            "rows": [(s, venues[s.key]) for s in top],
+            "min_ratings": MIN_RATINGS,
+            "window_days": WINDOW_DAYS,
+        },
+    )

@@ -78,6 +78,9 @@ class Venue(models.Model):
     notify_email = models.EmailField(blank=True)
     email_alerts = models.BooleanField(default=True)
     push_alerts = models.BooleanField(default=True)
+    show_on_leaderboard = models.BooleanField(
+        default=False, help_text="Opt-in: list this venue on the public cleanest-bathrooms page."
+    )
     ntfy_topic = models.CharField(
         max_length=64, unique=True, default=new_ntfy_topic, editable=False
     )

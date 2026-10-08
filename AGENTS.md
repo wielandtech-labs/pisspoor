@@ -106,6 +106,11 @@ Back office is Django admin.
   (shipped broken on the venue board, 2026-10-08). Use `same-origin`, which
   still keeps secret-token URLs out of referrers to other sites. Guarded by
   `core/tests/test_referrer_policy.py`.
+- **The leaderboard never shames.** `/cleanest` lists only venues that opted
+  in (`show_on_leaderboard`, default off) and qualify (`MIN_RATINGS` in the
+  last `WINDOW_DAYS`), top `TOP_N` only. Ranking is the Bayesian average in
+  `feedback/leaderboard.py` (pure `rank()`, table-tested); the network mean
+  includes non-listed venues so opting in can't move the bar.
 - **Never store a raw IP.** Visitor identity is `scans.visitors.visitor_hash`
   (HMAC of date + client IP + UA + a random one-day `ppv` cookie). It is per
   day by design; don't widen it. The cookie is load-bearing: public HTTPS
