@@ -22,4 +22,6 @@ def brand(request: HttpRequest) -> dict[str, object]:
         "is_fun_site": is_fun_site(request),
         "brand_tld": "lol" if _host(request).endswith(".lol") else "com",
         "agency_url": settings.AGENCY_URL,
+        "operator": settings.OPERATOR_LEGAL_NAME,
+        "legal_email": settings.LEGAL_EMAIL,
     }

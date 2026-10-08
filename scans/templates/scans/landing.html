@@ -51,6 +51,7 @@
         <input type="text" id="comment" name="comment" maxlength="280" placeholder="e.g. the hand dryer is a jet engine"></div>
       <div class="hp" aria-hidden="true"><input type="text" name="website" tabindex="-1" autocomplete="off"></div>
       <button class="btn" type="submit">Rate it</button>
+      <p class="fine" style="margin:8px 0 0">By submitting, you agree to our <a href="{% url 'marketing:terms' %}">Terms</a>.</p>
     </form>
     {% endif %}
   </div>
@@ -68,11 +69,12 @@
         <input type="text" id="note" name="note" maxlength="280" placeholder="e.g. second stall, the lock is broken"></div>
       <div class="hp" aria-hidden="true"><input type="text" name="website" tabindex="-1" autocomplete="off"></div>
       <button class="btn" type="submit">Tell the staff</button>
+      <p class="fine" style="margin:8px 0 0">By submitting, you agree to our <a href="{% url 'marketing:terms' %}">Terms</a>.</p>
     </form>
   </div>
 
   <p class="fine" style="text-align:center;margin-top:22px">
-    Anonymous. No account, no tracking. <a href="{% url 'marketing:privacy' %}">Privacy</a> ·
+    Anonymous. No account, no tracking. <a href="{% url 'marketing:privacy' %}">Privacy</a> · <a href="{% url 'marketing:terms' %}">Terms</a> ·
     <a href="{% url 'feedback:cleanest' %}">Cleanest bathrooms</a> ·
     <a href="{% url 'marketing:home' %}">Want this in your bathroom?</a>
   </p>

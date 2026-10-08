@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Terms of Use · pisspooridea.{{ brand_tld }}{% endblock %}
+{% block body %}
+<main class="landing legal" style="max-width:760px">
+  <a class="logo" href="/">piss<span style="color:var(--red)">poor</span>idea.{{ brand_tld }}</a>
+  <h1 style="margin-top:20px">Terms of Use</h1>
+  <p class="fine">Version 2026-10-v1 · Effective October 8, 2026</p>
+  <p>These terms apply when you use pisspooridea.lol, pisspooridea.com or any page you reach by scanning one of our stickers (the "Service"). The Service is run by {{ operator }} ("we", "us"). By using it, you agree to these terms. If you don't agree, please don't use the Service.</p>
+
+  <h3>1. What this is</h3>
+  <p>Participating venues display our QR code stickers. Scanning one shows the venue's name and links, at most one ad, and options to rate the restroom or report a problem to the venue's staff. Some of it is a joke. These terms aren't.</p>
+
+  <h3>2. Not for emergencies</h3>
+  <p>Maintenance reports go to the venue's staff, who may not see them right away. <strong>If someone is hurt or in danger, call 911.</strong> Don't rely on the Service for anything urgent.</p>
+
+  <h3>3. What you submit</h3>
+  <ol>
+    <li>Ratings, comments and reports you submit ("Your Content") are shown to the venue and may be counted in public scores such as our cleanest-bathrooms leaderboard. You give us and the venue a non-exclusive, royalty-free, perpetual license to use, display and analyze Your Content to operate and improve the Service.</li>
+    <li>Your Content must be honest and lawful. Don't include anyone's name, photo or contact details; harass, threaten or defame anyone; or submit false reports.</li>
+    <li>We may remove or decline to display any of Your Content, for any reason.</li>
+  </ol>
+
+  <h3>4. Things you may not do</h3>
+  <ul>
+    <li><strong>Put our stickers on property without the owner's permission.</strong> If you got a sticker from us, stick it on your own things.</li>
+    <li>Scan, rate or report automatically or in bulk, or try to inflate a venue's scans or scores.</li>
+    <li>Interfere with the Service, probe it for weaknesses, or access parts of it you aren't given a link to.</li>
+    <li>Copy or scrape the Service, or use it for anything unlawful.</li>
+  </ul>
+
+  <h3>5. Ads and other websites</h3>
+  <p>Ads are labeled and come from third parties. Showing an ad isn't an endorsement. Links to other websites, including advertisers' and venues' pages, are governed by those sites' own terms and privacy policies, and we're not responsible for them.</p>
+
+  <h3>6. Scores and ratings are opinions</h3>
+  <p>Ratings and leaderboard positions reflect what guests submitted. They aren't inspections or statements of fact by us about any venue's cleanliness, safety or compliance with any law.</p>
+
+  <h3>7. Help information</h3>
+  <p>We show contact information for the National Human Trafficking Hotline as a public service. We aren't affiliated with or endorsed by the Hotline or its operator, and we can't guarantee its availability. In an emergency, call 911.</p>
+
+  <h3>8. Privacy</h3>
+  <p>Our <a href="{% url 'marketing:privacy' %}">Privacy Policy</a> explains what we record and why. The Service isn't directed at children under 13.</p>
+
+  <h3>9. Our content</h3>
+  <p>The Service's design, text, artwork and stickers belong to us or our licensors. You may share links to it. Please don't copy it.</p>
+
+  <h3>10. Disclaimers and limits</h3>
+  <ol>
+    <li>The Service is provided "as is" and "as available", without warranties of any kind, express or implied, to the fullest extent the law allows.</li>
+    <li>To the fullest extent the law allows, we aren't liable for indirect, incidental, special or consequential damages, and our total liability to you for any claim about the Service is limited to $50.</li>
+    <li>You'll indemnify us against claims arising from Your Content or your violation of these terms.</li>
+  </ol>
+
+  <h3>11. Changes</h3>
+  <p>We may update these terms by posting a new version here with a new effective date. Using the Service after that means you accept the new version.</p>
+
+  <h3>12. Law and disputes</h3>
+  <p>Michigan law governs these terms. Disputes go to the state or federal courts for Kent County, Michigan, or to small claims court where it qualifies.</p>
+
+  <h3>13. Contact</h3>
+  <p>{% if legal_email %}Email <a href="mailto:{{ legal_email }}">{{ legal_email }}</a>.{% else %}Use the contact form on our <a href="{% url 'marketing:home' %}">homepage</a>.{% endif %}</p>
+</main>
+{% endblock %}

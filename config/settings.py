@@ -44,6 +44,11 @@ AGENCY_URL = os.environ.get("AGENCY_URL", "https://pisspooridea.com").rstrip("/"
 # See core/middleware.py.
 ADMIN_HOSTS = [host.lower() for host in _env_list("ADMIN_HOSTS")]
 
+# The party to our legal documents (core/legal.py). Set to the formed entity,
+# e.g. "PPI Media LLC, d/b/a Piss Poor Idea"; LEGAL_EMAIL receives notices.
+OPERATOR_LEGAL_NAME = os.environ.get("OPERATOR_LEGAL_NAME", "Piss Poor Idea")
+LEGAL_EMAIL = os.environ.get("LEGAL_EMAIL", "")
+
 # Notifications (core/notify.py). Without EMAIL_HOST and a password, emails
 # print to the log instead of sending (prod sets the host before the sealed
 # password exists); without NTFY_URL, pushes are skipped.

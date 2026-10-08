@@ -5,6 +5,7 @@ from __future__ import annotations
 from django.db.models import Count, Q
 from django.shortcuts import render
 
+from .legal import ADVERTISER_TERMS_TEMPLATE
 from .models import Campaign
 
 
@@ -37,3 +38,9 @@ def political_archive(request):
         .order_by("-starts_on", "advertiser")
     )
     return render(request, "ads/political_archive.html", {"ads": ads})
+
+
+def advertiser_terms(request):
+    return render(
+        request, "ads/advertiser_terms_page.html", {"terms_template": ADVERTISER_TERMS_TEMPLATE}
+    )

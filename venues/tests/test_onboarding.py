@@ -12,6 +12,8 @@ pytestmark = pytest.mark.django_db
 # label. Change the text -> bump the version -> update this hash.
 SIGNED_TEXTS = {
     "2026-10-v1": "1d831476229cba0ae3c4faaa211fb42ccdd68e197b9b12392edd315be21eaff6",
+    # Rendered with the default OPERATOR_LEGAL_NAME / LEGAL_EMAIL settings.
+    "2026-10-v2": "26f1e9cafa0a7cf73f38fb69c8fac8f6dd0ee89bea764c11a9b0f365a1b57aa2",
 }
 
 
@@ -160,3 +162,14 @@ def test_duplicate_names_get_unique_slugs(client):
 
     Venue.objects.create(name="The Rusty Tap", slug="the-rusty-tap")
     assert unique_slug("The Rusty Tap") == "the-rusty-tap-2"
+
+
+def test_v1_agreement_text_is_kept_unchanged():
+    from core.legal import render_legal, sha256
+
+    assert sha256(render_legal("venues/agreement_v1.html")) == SIGNED_TEXTS["2026-10-v1"]
+
+
+def test_agreement_names_the_configured_operator(client, settings):
+    settings.OPERATOR_LEGAL_NAME = "PPI Media LLC, d/b/a Piss Poor Idea"
+    assert "PPI Media LLC, d/b/a Piss Poor Idea" in client.get("/venues/join").content.decode()
