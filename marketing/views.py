@@ -1,6 +1,10 @@
+from urllib.parse import urlsplit
+
 from django import forms
 from django.conf import settings
+from django.http import Http404, HttpResponse
 from django.shortcuts import redirect, render
+from django.urls import reverse
 
 from .models import Lead
 from .scenes import homepage_scenes
@@ -44,3 +48,50 @@ def privacy(request):
 
 def terms(request):
     return render(request, "marketing/terms.html")
+
+
+# Public pages worth indexing. Everything else is a short code, a secret-token
+# venue board, or the tailnet-only back office, none of which belongs in search.
+SITEMAP_PAGES = [
+    "marketing:home",
+    "venues:join",
+    "feedback:cleanest",
+    "ads:policy",
+    "ads:political_archive",
+    "ads:advertiser_terms",
+    "venues:agreement",
+    "marketing:privacy",
+    "marketing:terms",
+]
+
+
+def _indexable(request) -> bool:
+    # Only the real brand domains get indexed; dev and review hosts tell
+    # crawlers to stay out so they never compete with prod in search.
+    hosts = {urlsplit(url).hostname for url in (settings.PUBLIC_BASE_URL, settings.AGENCY_URL)}
+    hosts.update(settings.FUN_HOSTS)
+    host = request.get_host().split(":")[0].lower()
+    return host in hosts or host.removeprefix("www.") in hosts
+
+
+def robots_txt(request):
+    if not _indexable(request):
+        return HttpResponse("User-agent: *\nDisallow: /\n", content_type="text/plain")
+    lines = [
+        "User-agent: *",
+        # Venue boards are secret-token URLs; keep them out even if one leaks.
+        "Disallow: /b/",
+        "Disallow: /admin/",
+        "Disallow: /print/",
+        "Disallow: /venues/join/done/",
+        "",
+        f"Sitemap: {request.build_absolute_uri(reverse('marketing:sitemap'))}",
+    ]
+    return HttpResponse("\n".join(lines) + "\n", content_type="text/plain")
+
+
+def sitemap_xml(request):
+    if not _indexable(request):
+        raise Http404
+    urls = [request.build_absolute_uri(reverse(name)) for name in SITEMAP_PAGES]
+    return render(request, "marketing/sitemap.xml", {"urls": urls}, content_type="application/xml")
