@@ -97,6 +97,8 @@ MIDDLEWARE = [
     # Must stay first: health probes arrive with the pod IP as Host and would
     # otherwise be rejected by the ALLOWED_HOSTS check. See core/views.py.
     "core.views.HealthCheckMiddleware",
+    # Before the visitor cookie, so a redirect never sets one.
+    "core.middleware.WwwRedirectMiddleware",
     "scans.visitors.VisitorCookieMiddleware",
     # Outside CommonMiddleware on purpose: its APPEND_SLASH would turn the 404
     # for a bare "/admin" into a 301 to "/admin/", revealing the route exists.
