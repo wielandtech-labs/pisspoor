@@ -35,9 +35,10 @@ def test_sitemap_lists_every_public_page_and_each_one_works(client):
         assert client.get(path, HTTP_HOST=PROD, secure=True).status_code == 200, path
 
 
-def test_www_host_is_indexable(client):
+def test_www_sitemap_redirects_to_the_apex_one(client):
     response = client.get("/sitemap.xml", HTTP_HOST="www.pisspooridea.lol", secure=True)
-    assert response.status_code == 200
+    assert response.status_code == 308
+    assert response["Location"] == "https://pisspooridea.lol/sitemap.xml"
 
 
 def test_review_hosts_stay_out_of_search(client):

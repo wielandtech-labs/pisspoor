@@ -53,7 +53,7 @@ def both_hosts(settings):
 
 
 def test_lol_host_gets_the_fun_front_door(client, both_hosts):
-    body = client.get("/", HTTP_HOST="www.pisspooridea.lol").content.decode()
+    body = client.get("/", HTTP_HOST="pisspooridea.lol").content.decode()
     assert "You found a piss poor idea." in body
     assert 'href="https://pisspooridea.com/venues/join"' in body
     assert "The Big Splash" not in body
