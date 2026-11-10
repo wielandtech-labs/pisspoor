@@ -20,7 +20,9 @@ concurrency:
 jobs:
   test:
     name: Lint and test
-    runs-on: homelab-dind
+    # Fork PRs run on GitHub-hosted runners, never on the self-hosted ones
+    # (they sit inside the cluster).
+    runs-on: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository && 'ubuntu-latest' || 'homelab-dind' }}
     steps:
       - uses: actions/checkout@v4
 
