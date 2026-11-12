@@ -137,6 +137,7 @@
       </div>
       <div>
         {% if thanks %}<div class="notice" role="status">Got it! We'll be in touch soon.</div>{% endif %}
+        {% if error %}<div class="notice warn" role="alert">{{ error }}</div>{% endif %}
         <form method="post" action="/#contact" novalidate>
           {% csrf_token %}
           <div class="field"><label for="id_kind">I am…</label>{{ form.kind }}</div>

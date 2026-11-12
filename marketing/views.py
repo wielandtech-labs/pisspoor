@@ -1,3 +1,5 @@
+import logging
+from datetime import timedelta
 from urllib.parse import urlsplit
 
 from django import forms
@@ -5,10 +7,15 @@ from django.conf import settings
 from django.http import Http404, HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
+from django.utils import timezone
+
+from scans.visitors import client_ip_hash
 
 from .models import Lead
 from .scenes import homepage_scenes
 from .sites import is_fun_site
+
+log = logging.getLogger(__name__)
 
 
 class LeadForm(forms.ModelForm):
@@ -23,22 +30,44 @@ class LeadForm(forms.ModelForm):
         widgets = {"message": forms.Textarea(attrs={"rows": 4})}
 
 
+# Leads one client IP may send per hour. Until the droplet forwards real client
+# IPs (see scans.visitors), every public visitor shares one IP, so this is
+# also a site-wide cap.
+LEADS_PER_IP_PER_HOUR = 5
+
+
+def too_many_leads(client_hash: str) -> bool:
+    since = timezone.now() - timedelta(hours=1)
+    recent = Lead.objects.filter(client_hash=client_hash, created_at__gte=since)
+    return recent.count() >= LEADS_PER_IP_PER_HOUR
+
+
 def home(request):
     if is_fun_site(request):
         return render(request, "marketing/fun.html", homepage_scenes(settings.PUBLIC_BASE_URL))
     form = LeadForm(request.POST or None)
+    error = ""
     if request.method == "POST" and form.is_valid():
-        if not form.cleaned_data["website"]:
+        if form.cleaned_data["website"]:  # honeypot: pretend it worked
+            return redirect("/?thanks=1#contact")
+        client_hash = client_ip_hash(request)
+        if too_many_leads(client_hash):
+            log.warning("Lead rejected: over %s per IP per hour", LEADS_PER_IP_PER_HOUR)
+            error = "We've had a lot of messages from your network. Try again in an hour."
+        else:
+            form.instance.client_hash = client_hash
             form.save()
-        return redirect("/?thanks=1#contact")
+            return redirect("/?thanks=1#contact")
     return render(
         request,
         "marketing/home.html",
         {
             "form": form,
+            "error": error,
             "thanks": request.GET.get("thanks") == "1",
             **homepage_scenes(settings.PUBLIC_BASE_URL),
         },
+        status=429 if error else 200,
     )
 
 

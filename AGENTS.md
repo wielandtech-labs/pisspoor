@@ -125,6 +125,8 @@ Back office is Django admin.
   IPs reach the cluster, a script that drops cookies counts as a new visitor
   per request, so payout fraud resistance is weak; check the admin's scan
   list for implausible spikes before paying out.
+  The homepage lead form allows `LEADS_PER_IP_PER_HOUR` per client IP
+  (`client_ip_hash`, no cookie term): a site-wide cap until real IPs arrive.
 - **Payouts reconcile exactly.** `scans.payouts.split_revenue` rounds venue
   shares down and gives the remainder to the house; it is pure and
   table-tested. A unique scan is a distinct (placement, visitor, day), bots
