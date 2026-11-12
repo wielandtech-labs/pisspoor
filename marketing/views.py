@@ -4,6 +4,7 @@ from urllib.parse import urlsplit
 
 from django import forms
 from django.conf import settings
+from django.db import connection, transaction
 from django.http import Http404, HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -42,6 +43,26 @@ def too_many_leads(client_hash: str) -> bool:
     return recent.count() >= LEADS_PER_IP_PER_HOUR
 
 
+def save_lead_unless_limited(form: LeadForm, client_hash: str) -> bool:
+    """Save the lead unless its sender is over the limit; False if rejected.
+
+    The count and the insert share one transaction holding a Postgres advisory
+    lock on the client hash, so parallel POSTs from one sender queue up instead
+    of all passing the count. The lock is released at commit.
+    """
+    with transaction.atomic():
+        if connection.vendor == "postgresql":  # SQLite (local dev, tests) has no such lock
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    "SELECT pg_advisory_xact_lock(hashtext(%s))", [f"marketing.lead:{client_hash}"]
+                )
+        if too_many_leads(client_hash):
+            return False
+        form.instance.client_hash = client_hash
+        form.save()
+    return True
+
+
 def home(request):
     if is_fun_site(request):
         return render(request, "marketing/fun.html", homepage_scenes(settings.PUBLIC_BASE_URL))
@@ -50,14 +71,10 @@ def home(request):
     if request.method == "POST" and form.is_valid():
         if form.cleaned_data["website"]:  # honeypot: pretend it worked
             return redirect("/?thanks=1#contact")
-        client_hash = client_ip_hash(request)
-        if too_many_leads(client_hash):
-            log.warning("Lead rejected: over %s per IP per hour", LEADS_PER_IP_PER_HOUR)
-            error = "We've had a lot of messages from your network. Try again in an hour."
-        else:
-            form.instance.client_hash = client_hash
-            form.save()
+        if save_lead_unless_limited(form, client_ip_hash(request)):
             return redirect("/?thanks=1#contact")
+        log.warning("Lead rejected: over %s per IP per hour", LEADS_PER_IP_PER_HOUR)
+        error = "We've had a lot of messages from your network. Try again in an hour."
     return render(
         request,
         "marketing/home.html",
