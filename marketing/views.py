@@ -1,3 +1,4 @@
+import logging
 from datetime import timedelta
 from urllib.parse import urlsplit
 
@@ -13,6 +14,8 @@ from scans.visitors import client_ip_hash
 from .models import Lead
 from .scenes import homepage_scenes
 from .sites import is_fun_site
+
+log = logging.getLogger(__name__)
 
 
 class LeadForm(forms.ModelForm):
@@ -49,6 +52,7 @@ def home(request):
             return redirect("/?thanks=1#contact")
         client_hash = client_ip_hash(request)
         if too_many_leads(client_hash):
+            log.warning("Lead rejected: over %s per IP per hour", LEADS_PER_IP_PER_HOUR)
             error = "We've had a lot of messages from your network. Try again in an hour."
         else:
             form.instance.client_hash = client_hash

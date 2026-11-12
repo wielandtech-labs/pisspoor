@@ -15,7 +15,7 @@ class Lead(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     handled = models.BooleanField(default=False)
     # scans.visitors.client_ip_hash of the sender, for the per-IP limit.
-    client_hash = models.CharField(max_length=64, blank=True, editable=False)
+    client_hash = models.CharField(max_length=64, blank=True, editable=False, db_index=True)
 
     class Meta:
         ordering = ["-created_at"]

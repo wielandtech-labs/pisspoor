@@ -78,11 +78,11 @@ def visitor_hash(request: HttpRequest, day: date | None = None) -> str:
     return hmac.new(settings.SCAN_HASH_SECRET.encode(), message, hashlib.sha256).hexdigest()
 
 
-def client_ip_hash(request: HttpRequest, day: date | None = None) -> str:
-    """HMAC of the day and client IP alone, for per-IP rate limits a script
-    can't dodge by dropping cookies. Same privacy terms as visitor_hash."""
-    day = day or timezone.localdate()
-    message = f"{day.isoformat()}|{client_ip(request)}".encode()
+def client_ip_hash(request: HttpRequest) -> str:
+    """Keyed hash of the client IP alone, for per-IP rate limits a script can't
+    dodge by dropping cookies. No date term, so a window can't reset at midnight;
+    it only ever sits next to contact details the sender typed in anyway."""
+    message = client_ip(request).encode()
     return hmac.new(settings.SCAN_HASH_SECRET.encode(), message, hashlib.sha256).hexdigest()
 
 
