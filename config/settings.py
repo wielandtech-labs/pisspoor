@@ -8,6 +8,8 @@ list and local-development defaults.
 import os
 from pathlib import Path
 
+from django.core.exceptions import ImproperlyConfigured
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -19,8 +21,14 @@ def _env_list(name: str) -> list[str]:
     return [item.strip() for item in os.environ.get(name, "").split(",") if item.strip()]
 
 
-SECRET_KEY = os.environ.get("SECRET_KEY", "insecure-dev-key-do-not-use-in-production")
 DEBUG = _env_bool("DEBUG")
+# Fail closed: a missing SECRET_KEY outside DEBUG would sign sessions with a
+# key anyone can read in this public repo.
+SECRET_KEY = os.environ.get("SECRET_KEY", "")
+if not SECRET_KEY:
+    if not DEBUG:
+        raise ImproperlyConfigured("SECRET_KEY must be set when DEBUG is off.")
+    SECRET_KEY = "insecure-dev-key-do-not-use-in-production"
 
 ALLOWED_HOSTS = _env_list("ALLOWED_HOSTS")
 if DEBUG and not ALLOWED_HOSTS:

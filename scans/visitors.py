@@ -78,6 +78,14 @@ def visitor_hash(request: HttpRequest, day: date | None = None) -> str:
     return hmac.new(settings.SCAN_HASH_SECRET.encode(), message, hashlib.sha256).hexdigest()
 
 
+def client_ip_hash(request: HttpRequest, day: date | None = None) -> str:
+    """HMAC of the day and client IP alone, for per-IP rate limits a script
+    can't dodge by dropping cookies. Same privacy terms as visitor_hash."""
+    day = day or timezone.localdate()
+    message = f"{day.isoformat()}|{client_ip(request)}".encode()
+    return hmac.new(settings.SCAN_HASH_SECRET.encode(), message, hashlib.sha256).hexdigest()
+
+
 def is_bot(ua: str) -> bool:
     ua = ua.lower()
     return not ua or any(marker in ua for marker in BOT_MARKERS)

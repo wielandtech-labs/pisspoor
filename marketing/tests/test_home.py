@@ -85,3 +85,41 @@ def test_lol_host_serving_agency_face_still_says_lol(client, settings):
     assert "The Big Splash" in body
     assert "pisspooridea.com" not in body
     assert "idea<span>.</span>lol" in body
+
+
+def _lead(client, ip, **extra):
+    data = {"kind": "venue", "name": "Sam", "email": "sam@example.com", **extra}
+    # Traefik appends the real client IP; anything left of it is the client's claim.
+    return client.post("/", data, HTTP_X_FORWARDED_FOR=f"6.6.6.6, {ip}")
+
+
+def test_lead_limit_rejects_the_nth_lead_from_one_ip(client):
+    from marketing.views import LEADS_PER_IP_PER_HOUR
+
+    for _ in range(LEADS_PER_IP_PER_HOUR):
+        assert _lead(client, "203.0.113.9").status_code == 302
+    response = _lead(client, "203.0.113.9")
+    assert response.status_code == 429
+    assert "Try again in an hour" in response.content.decode()
+    assert Lead.objects.count() == LEADS_PER_IP_PER_HOUR
+    assert _lead(client, "198.51.100.7").status_code == 302  # other IPs unaffected
+
+
+def test_lead_limit_window_expires(client):
+    from datetime import timedelta
+
+    from django.utils import timezone
+
+    from marketing.views import LEADS_PER_IP_PER_HOUR
+
+    for _ in range(LEADS_PER_IP_PER_HOUR):
+        _lead(client, "203.0.113.9")
+    Lead.objects.update(created_at=timezone.now() - timedelta(minutes=61))
+    assert _lead(client, "203.0.113.9").status_code == 302
+
+
+def test_lead_stores_no_raw_ip(client):
+    _lead(client, "203.0.113.9")
+    lead = Lead.objects.get()
+    assert len(lead.client_hash) == 64
+    assert "203.0.113.9" not in lead.client_hash
