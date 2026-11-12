@@ -105,6 +105,9 @@ MIDDLEWARE = [
     # Must stay first: health probes arrive with the pod IP as Host and would
     # otherwise be rejected by the ALLOWED_HOSTS check. See core/views.py.
     "core.views.HealthCheckMiddleware",
+    # Right after the probe shortcut, so every response the site serves carries
+    # the policy, including the 404s and redirects from the middleware below.
+    "core.middleware.ContentSecurityPolicyMiddleware",
     # Before the visitor cookie, so a redirect never sets one.
     "core.middleware.WwwRedirectMiddleware",
     "scans.visitors.VisitorCookieMiddleware",
@@ -120,7 +123,6 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "core.middleware.ContentSecurityPolicyMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -192,8 +194,9 @@ SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
 
 # Content-Security-Policy, Report-Only until a soak shows no violations; then
-# it moves to an enforced header. 'unsafe-inline' covers the inline <script>
-# and <style> blocks, on*="" handlers and style="" attributes in the templates.
+# it moves to an enforced header. 'unsafe-inline' covers
+# the print sheet's <style> block and onclick handler, and the style=""
+# attributes in the templates.
 # Everything (pages, static files, uploaded images) is same-origin.
 CONTENT_SECURITY_POLICY_REPORT_ONLY = "; ".join(
     [

@@ -9,6 +9,7 @@ HEADER = "Content-Security-Policy-Report-Only"
 @pytest.mark.django_db
 def test_pages_carry_the_report_only_policy(client, settings):
     response = client.get("/")
+    assert response.status_code == 200
     assert response[HEADER] == settings.CONTENT_SECURITY_POLICY_REPORT_ONLY
     assert "Content-Security-Policy" not in response
 
@@ -19,7 +20,7 @@ def test_policy_keeps_the_hardening_directives(settings):
         assert directive in policy
 
 
-def test_a_view_header_wins(rf, settings):
+def test_a_view_header_wins(rf):
     def view(request):
         response = HttpResponse()
         response[HEADER] = "default-src 'none'"

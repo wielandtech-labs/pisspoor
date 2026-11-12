@@ -62,7 +62,7 @@ class ContentSecurityPolicyMiddleware:
     """Send settings.CONTENT_SECURITY_POLICY_REPORT_ONLY on every response.
 
     Report-Only: browsers log violations in the console and block nothing.
-    A view that sets the header itself keeps its own value.
+    A view that sets its own Report-Only header keeps that value.
     """
 
     def __init__(self, get_response):
