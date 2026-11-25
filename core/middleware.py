@@ -56,3 +56,21 @@ class WwwRedirectMiddleware:
             response.status_code = 308
             return response
         return self.get_response(request)
+
+
+class ContentSecurityPolicyMiddleware:
+    """Send settings.CONTENT_SECURITY_POLICY_REPORT_ONLY on every response.
+
+    Report-Only: browsers log violations in the console and block nothing.
+    A view that sets its own Report-Only header keeps that value.
+    """
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+        policy = settings.CONTENT_SECURITY_POLICY_REPORT_ONLY
+        if policy:
+            response.headers.setdefault("Content-Security-Policy-Report-Only", policy)
+        return response

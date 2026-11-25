@@ -105,6 +105,9 @@ MIDDLEWARE = [
     # Must stay first: health probes arrive with the pod IP as Host and would
     # otherwise be rejected by the ALLOWED_HOSTS check. See core/views.py.
     "core.views.HealthCheckMiddleware",
+    # Right after the probe shortcut, so every response the site serves carries
+    # the policy, including the 404s and redirects from the middleware below.
+    "core.middleware.ContentSecurityPolicyMiddleware",
     # Before the visitor cookie, so a redirect never sets one.
     "core.middleware.WwwRedirectMiddleware",
     "scans.visitors.VisitorCookieMiddleware",
@@ -189,6 +192,24 @@ SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SECURE_SSL_REDIRECT = _env_bool("SECURE_SSL_REDIRECT")
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
+
+# Content-Security-Policy, Report-Only until a soak shows no violations; then
+# it moves to an enforced header. 'unsafe-inline' covers
+# the print sheet's <style> block and onclick handler, and the style=""
+# attributes in the templates.
+# Everything (pages, static files, uploaded images) is same-origin.
+CONTENT_SECURITY_POLICY_REPORT_ONLY = "; ".join(
+    [
+        "default-src 'self'",
+        "script-src 'self' 'unsafe-inline'",
+        "style-src 'self' 'unsafe-inline'",
+        "img-src 'self' data:",
+        "object-src 'none'",
+        "base-uri 'self'",
+        "form-action 'self'",
+        "frame-ancestors 'none'",
+    ]
+)
 
 LOGGING = {
     "version": 1,
