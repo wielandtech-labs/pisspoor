@@ -123,3 +123,35 @@ def test_lead_stores_no_raw_ip(client):
     lead = Lead.objects.get()
     assert len(lead.client_hash) == 64
     assert "203.0.113.9" not in lead.client_hash
+
+
+def test_save_lead_unless_limited_stops_at_the_limit():
+    from marketing.views import LEADS_PER_IP_PER_HOUR, LeadForm, save_lead_unless_limited
+
+    def form():
+        f = LeadForm({"kind": "venue", "name": "Sam", "email": "sam@example.com"})
+        assert f.is_valid()
+        return f
+
+    results = [save_lead_unless_limited(form(), "a" * 64) for _ in range(LEADS_PER_IP_PER_HOUR + 2)]
+    assert results == [True] * LEADS_PER_IP_PER_HOUR + [False, False]
+    assert Lead.objects.filter(client_hash="a" * 64).count() == LEADS_PER_IP_PER_HOUR
+    assert save_lead_unless_limited(form(), "b" * 64)  # other senders unaffected
+
+
+def test_save_lead_takes_the_advisory_lock_on_postgres(monkeypatch):
+    # The suite runs on SQLite; this pins that the Postgres path locks first.
+    from unittest import mock
+
+    import marketing.views
+    from marketing.views import LeadForm, save_lead_unless_limited
+
+    fake = mock.MagicMock(vendor="postgresql")
+    monkeypatch.setattr(marketing.views, "connection", fake)
+    form = LeadForm({"kind": "venue", "name": "Sam", "email": "sam@example.com"})
+    assert form.is_valid()
+    assert save_lead_unless_limited(form, "a" * 64)
+    execute = fake.cursor.return_value.__enter__.return_value.execute
+    execute.assert_called_once_with(
+        "SELECT pg_advisory_xact_lock(hashtext(%s))", ["marketing.lead:" + "a" * 64]
+    )
